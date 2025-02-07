@@ -1,0 +1,21 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #004d40;
+    color: white;
+  }
+  
+  .search-bar {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .icon {
+    margin: 0 10px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
