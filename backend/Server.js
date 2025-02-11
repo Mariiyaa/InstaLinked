@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const profileRoutes=require('./routes/profileRoutes')
 const exploreRoutes=require('./routes/exploreRoutes')
 const personaRoutes = require('./routes/persona');
+const CreatePostRoute = require('./routes/CreatePostRoute');
 const ContentSelectRoutes = require('./routes/ContentSelect');
 const { connect } = require('http2');
 require('dotenv').config();
@@ -30,6 +31,7 @@ app.use('/api/profile',profileRoutes);
 app.use('/api/explore',exploreRoutes);
 app.use('/api', personaRoutes);
 app.use('/api', ContentSelectRoutes);
+app.use('/api', CreatePostRoute);
 
 const PORT = process.env.PORT || 5000;
 mongoose

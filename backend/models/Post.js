@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
-  user_id: {
-    type: mongoose.Schema.Types.ObjectId, // Reference to the user ID
+  user_email: {
+    type: String, // Reference to the user ID
     required: true,
     ref: 'User',
   },
@@ -19,7 +19,24 @@ const postSchema = new mongoose.Schema({
       content_type: {
         type: String, // Type of content (e.g., 'image', 'video', 'article')
         required: true,
-        enum: ['image', 'reel','documentary', 'article','audio','pdf'], // Valid content types
+         // Valid content types
+      },
+      category:{
+        type:String,
+        required:true,
+        default:'',
+      },
+      hashtags:{
+        type:String,
+        default:'',
+      },
+      tags:{
+        type:String,
+        default:'',
+      },
+      visibility:{
+        type:String,
+        default:'',
       },
       created_at: {
         type: Date, // Timestamp for when the post was created

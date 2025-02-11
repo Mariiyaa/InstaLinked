@@ -1,20 +1,28 @@
-import React from "react";
-import "../style/Navbar.css";
+import React from 'react';
+import '../style/Navbar.css';
+import logo from '../assets/logo.svg'
 
 const Navbar = () => {
   return (
-    <nav className="navbar">
-      <div className="navbar-left">
-        <input type="text" placeholder="Search" className="search-bar" />
-      </div>
-      <div className="navbar-right">
-        <i className="icon home-icon">🏠</i>
-        <i className="icon add-icon">➕</i>
-        <i className="icon mail-icon">✉️</i>
-        <i className="icon profile-icon">👤</i>
-      </div>
-    </nav>
+    <div className="navbar">
+
+        {/* Insert your SVG logo here */}
+        <img src={logo} alt="InstaLinked Logo"  className="logo"/>
+     
+      <nav>
+        <ul className="nav-links">
+          <li><a href="/login">Menu item 1</a></li>
+          <li><a href="/login">Menu item 2</a></li>
+          <li><a href="/login">Menu item 3</a></li>
+          <li><a href="login">Menu item 4</a></li>
+        </ul>
+        <div className="auth-links">
+          <a href="/login" className="login">Login</a>
+          <a href="/" className="signup">Sign Up</a>
+        </div>
+      </nav>
+    </div>
   );
-};
+}
 
 export default Navbar;

@@ -1,21 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import {  Link, useNavigate } from "react-router-dom";
 import '../style/explore.css';
+import AppNavbar from './AppNavbar'
 
 const Explore = () => {
     const [posts, setPosts] = useState([]);
     const videoRefs = useRef({});
-    const navigate = useNavigate();
-    const location = useLocation();
-
+    const navigate=useNavigate()
     useEffect(() => {
         const fetchPosts = async () => {
             try {
                 const response = await axios.get('/api/explore/explore-page');
                 if (Array.isArray(response.data)) {
                     setPosts(arrangePosts(response.data));
-                    console.log(arrangePosts)
+                    console.log(posts)
                 } else {
                     console.error('Response data is not an array:', response.data);
                 }
@@ -60,7 +59,32 @@ const Explore = () => {
                     </div>
                 );
             case 'pdf':
-                return <iframe src={post.url} title="PDF Viewer" className='explore-pdf' />;
+                return (
+                    <div 
+                        className="explore-pdf-wrapper"
+                        onClick={() => navigate(`/explore-page/${post._id}`)}
+                        style={{ position: 'relative', cursor: 'pointer' }}
+                    >
+                        {/* Disable editing tools & sidebar */}
+                        <iframe 
+                            src={`${post.url}#toolbar=0&navpanes=0&scrollbar=0`} 
+                            title="PDF Viewer" 
+                            className='explore-pdf' 
+                        />
+                        {/* Transparent Clickable Overlay */}
+                        <div 
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                border:'transparent',
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                background: 'transparent'
+                            }}
+                        ></div>
+                    </div>
+                );
             default:
                 return <p className="text-red-500">Unsupported file type</p>;
         }
@@ -160,15 +184,10 @@ const Explore = () => {
     };
     
     
-    
-    
-    
-    
-    
-    
-    
-    
+
     return (
+        <>
+        <AppNavbar />
         <div className="explore-grid">
             {posts.length > 0 ? (
                 posts.map(post => (
@@ -189,6 +208,8 @@ const Explore = () => {
                 <p className="text-center text-gray-500">No posts available</p>
             )}
         </div>
+        </>
+        
     );
 };
 

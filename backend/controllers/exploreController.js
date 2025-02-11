@@ -1,72 +1,84 @@
+const Post = require("../models/Post");
+const User = require("../models/User");
 
-const Post = require('../models/Post'); // Assuming your schema is in models/Post.js
+const explorePage = async (req, res) => {
+  try {
+    const posts = await Post.aggregate([
+      { $unwind: "$posts" }, // Flatten posts array
+      {
+        $lookup: {
+          from: "users", // Collection name in MongoDB
+          localField: "user_email",
+          foreignField: "email",
+          as: "userDetails",
+        },
+      },
+      { $unwind: "$userDetails" }, // Convert userDetails array to object
+      {
+        $project: {
+          _id: "$posts._id",
+          url: "$posts.url",
+          caption: "$posts.caption",
+          content_type: "$posts.content_type",
+          category: "$posts.category",
+          hashtags: "$posts.hashtags",
+          tags: "$posts.tags",
+          visibility: "$posts.visibility",
+          created_at: "$posts.created_at",
+          // User details
+          user: {
+            fullName: "$userDetails.fullName",
+            profileImage: "$userDetails.profileImage",
+            bio: "$userDetails.bio",
+            location: "$userDetails.location",
+            occupation: "$userDetails.occupation",
+            persona: "$userDetails.persona",
+          },
+        },
+      },
+      { $sample: { size: 120 } }, // Random selection of 120 posts
+    ]);
 
+    // Separate PDFs and reels from other content
+    const mediaPosts = posts.filter(
+      (post) => post.content_type === "pdf" || post.content_type.startsWith("reel")
+    );
+    const otherPosts = posts.filter(
+      (post) => !(post.content_type === "pdf" || post.content_type.startsWith("reel"))
+    );
 
-  const explorePage=async (req,res)=> {
-    
-        // Fetch all documents from the Post collection
-        try {
-          const posts = await Post.aggregate([
-            { $unwind: "$posts" },
-            { $sample: { size: 120 } },
-            {
-              $project: {
-                _id: "$posts._id",
-                url: "$posts.url",
-                caption: "$posts.caption",
-                content_type: "$posts.content_type",
-                created_at: "$posts.created_at"
-              }
-            }
-          ]);
-          
-          // Separate PDFs and videos from other content
-          const mediaPosts = posts.filter(post => 
-            post.content_type === "pdf" || post.content_type.startsWith("reel")
-          );
-          const otherPosts = posts.filter(post => 
-            !(post.content_type === "pdf" || post.content_type.startsWith("reel"))
-          );
-          
-          let finalPosts = [];
-          let mediaIndex = 0, otherIndex = 0;
-          let lastMediaIndex = -9; // To track distance between media posts
-          
-          while (mediaIndex < mediaPosts.length || otherIndex < otherPosts.length) {
-            let row = []; // Dynamic row, no fixed `null` slots
-          
-            // Add a media post if the 10-post gap is satisfied
-            if (mediaIndex < mediaPosts.length && finalPosts.length - lastMediaIndex >= 10) {
-              let mediaPost = mediaPosts[mediaIndex++];
-              // Randomly place media post in the first or last column
-              if (Math.random() < 0.5) {
-                row.push(mediaPost); // Place in the first column
-              } else {
-                row.unshift(mediaPost); // Place in the last column
-              }
-              lastMediaIndex = finalPosts.length;
-            }
-          
-            // Fill the rest of the row with other posts
-            while (row.length < 3 && otherIndex < otherPosts.length) {
-              row.push(otherPosts[otherIndex++]);
-            }
-          
-          
-          
-            // Add row to final posts
-            finalPosts.push(...row.filter(Boolean)); // Remove null values
-          }
-          
-          console.log(finalPosts);
-          
-          res.status(200).json(finalPosts);
-        } catch (error) {
-          res.status(500).json({ error: error.message });
+    let finalPosts = [];
+    let mediaIndex = 0,
+      otherIndex = 0;
+    let lastMediaIndex = -9; // Ensures a gap of 9 posts between media posts
+
+    while (mediaIndex < mediaPosts.length || otherIndex < otherPosts.length) {
+      let row = []; // Dynamic row
+
+      // Add a media post if the 10-post gap is satisfied
+      if (mediaIndex < mediaPosts.length && finalPosts.length - lastMediaIndex >= 10) {
+        let mediaPost = mediaPosts[mediaIndex++];
+        if (Math.random() < 0.5) {
+          row.push(mediaPost); // First column
+        } else {
+          row.unshift(mediaPost); // Last column
         }
-    };
-    module.exports={explorePage}
-    
-    // Connect to MongoDB
-   
-  
+        lastMediaIndex = finalPosts.length;
+      }
+
+      // Fill the rest of the row with other posts
+      while (row.length < 3 && otherIndex < otherPosts.length) {
+        row.push(otherPosts[otherIndex++]);
+      }
+
+      finalPosts.push(...row.filter(Boolean)); // Remove null values
+    }
+    console.log(finalPosts)
+    res.status(200).json(finalPosts);
+  } catch (error) {
+    console.error("Error fetching explore page data:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { explorePage };

@@ -65,7 +65,7 @@ console.log(email,password)
     await sendEmail(newUser.email, 'Welcome to Instalinked!', message);
 
     var message = `Your verification code is ${otp}.`;
-    await sendEmail(newUser.email, 'otp verification resend Request', message);
+    await sendEmail(newUser.email, 'otp verification Request', message);
   
 
   } catch (error) {
@@ -180,7 +180,24 @@ const login = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token, userId: user._id, email: user.email, phone: user.phone });
+    res.json({
+      token,
+      user: {
+        userId: user._id,
+        fullname: user.fullName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        profileImage: user.profileImage || "",
+        bio: user.bio || "",
+        dateOfBirth: user.dateOfBirth || "",
+        gender: user.gender || "",
+        location: user.location || "",
+        occupation: user.occupation || "",
+        personas: user.persona || "",
+        contentPreferences: user.contentPreferences || "",
+        externalLinks: user.externalLinks || [],
+      },
+    });
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ message: 'Server error', error });
@@ -206,7 +223,24 @@ const loginWithGoogle = async (req, res) => {
     }
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token, userId: user._id, email: user.email ,name :decodedFirebaseToken.name });
+    res.json({
+      token,
+      user: {
+        userId: user._id,
+        fullname: user.fullName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        profileImage: user.profileImage || "",
+        bio: user.bio || "",
+        dateOfBirth: user.dateOfBirth || "",
+        gender: user.gender || "",
+        location: user.location || "",
+        occupation: user.occupation || "",
+        personas: user.persona || "",
+        contentPreferences: user.contentPreferences || "",
+        externalLinks: user.externalLinks || [],
+      },
+    });
   } catch (error) {
     console.error('LoginWithGoogle Error:', error);
     res.status(500).json({ message: 'Server error', error });

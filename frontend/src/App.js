@@ -16,6 +16,8 @@ import PersonaSelection from "./components/PersonaSelection";
 import ContentSelection from "./components/ContentSelection";
 import NameSelection from "./components/NameSelection";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import CreatePost from "./components/CreatePost";
 
 axios.defaults.baseURL = "http://localhost:5000"
 axios.defaults.withCredentials = true
@@ -30,25 +32,43 @@ const App = () => {
     }
   }, []);
   return (
-    <Router>
-      <Navbar/>
-      <Routes>
-      <Route path="/" element={<Signup/>} />
-      <Route path="/verify-otp" element={<OtpVerification />} />
-        <Route path="/create-profile" element={<CreateProfile/>} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/your-name" element={<NameSelection />} />
-        <Route path="/persona-selection" element={<PersonaSelection userEmail={user} />} />
-        <Route path="/content-selection" element={<ContentSelection userEmail={user} />} />
-        <Route path="/explore-page/:postId" element={<PopUPexplore />} />
-        <Route path="/Home" element={<Home />} />
-        <Route path="/reset-password-request" element={<ResetPasswordRequest />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/my-profile" element={<DisplayProfile/>} />
-        <Route path="/explore-page" element={<Explore/>} />
-        <Route path="/explore-page/:postId" element={<PopUPexplore />} />
-      </Routes>
-    </Router>
+<Router>
+  {/* Show Navbar only for Signup and Login */}
+  <Routes>
+    <Route path="/"element={
+        <>
+          <Navbar />
+          <Signup />
+        </>
+      }
+    />
+    <Route path="/login" element={
+        <>
+          <Navbar />
+          <Login />
+        </>
+      }
+    />
+  </Routes>
+
+  {/* Other Routes without Navbar */}
+  <Routes>
+    <Route path="/verify-otp" element={<OtpVerification />} />
+    <Route path="/create-profile" element={<CreateProfile />} />
+    <Route path="/create-post" element={<CreatePost />} />
+    <Route path="/your-name" element={<NameSelection />} />
+    <Route path="/persona-selection" element={<PersonaSelection userEmail={user} />} />
+    <Route path="/content-selection" element={<ContentSelection userEmail={user} />} />
+    <Route path="/explore-page/:postId" element={<PopUPexplore />} />
+    <Route path="/Home" element={<Home />} />
+    <Route path="/reset-password-request" element={<ResetPasswordRequest />} />
+    <Route path="/reset-password/:token" element={<ResetPassword />} />
+    <Route path="/my-profile" element={<DisplayProfile />} />
+    <Route path="/explore-page" element={<Explore />} />
+    <Route path="/explore-page/:postId" element={<PopUPexplore />} />
+  </Routes>
+</Router>
+
   );
 };
 
