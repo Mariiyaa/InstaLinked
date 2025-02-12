@@ -19,7 +19,8 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import CreatePost from "./components/CreatePost";
 
-axios.defaults.baseURL = "http://localhost:5000"
+
+axios.defaults.baseURL = process.env.REACT_APP_PORT
 axios.defaults.withCredentials = true
 
 
@@ -28,9 +29,11 @@ const App = () => {
   useEffect(() => {
     const storedEmail = localStorage.getItem("userEmail");
     if (storedEmail) {
-      setUser(storedEmail);  // ✅ Use setUser correctly
+      setUser(storedEmail); 
+      console.log(process.env) // ✅ Use setUser correctly
     }
   }, []);
+
   return (
 <Router>
   {/* Show Navbar only for Signup and Login */}

@@ -41,3 +41,10 @@ mongoose
   })
   .catch((err) => console.error(err));
 
+mongoose.connection.on('connected', () => {
+  console.log('✅ Mongoose connected to MongoDB',process.env.MONGO_URI);
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ Mongoose connection error:', err);
+});
