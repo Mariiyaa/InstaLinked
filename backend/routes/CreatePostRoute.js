@@ -25,7 +25,7 @@ const storage = new CloudinaryStorage({
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB file limit
     fileFilter: (req, file, cb) => {
       console.log("🧐 Checking File Type:", file.mimetype);
-      if (["image/", "video/", "application/pdf"].some(type => file.mimetype.startsWith(type))) {
+      if (["image/", "video/", "application/pdf","audio/"].some(type => file.mimetype.startsWith(type))) {
         cb(null, true);
       } else {
         cb(new Error("Invalid file type! Only images, videos, and PDFs are allowed."), false);

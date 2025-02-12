@@ -93,6 +93,7 @@
   
   .comments p {
     margin: 5px 0;
+    z-index:1;
   }
   
   .nav-button {
@@ -110,10 +111,12 @@
   .nav-button.left {
     width: 40px;
     left: 10px;
+    z-index: 1;
   }
   
   .nav-button.right {
     width: 40px;
     right: 10px;
+    z-index: 1;
   }
   

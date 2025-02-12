@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+import styled from 'styled-components';
 const ResetPasswordRequest = () => {
   const [email, setEmail] = useState("");
   const [message,setMessage]=useState("")
@@ -16,14 +16,73 @@ const ResetPasswordRequest = () => {
     }
   };
 
-  return (
-    <form onSubmit={handleRequest}>
-      <h2>Reset Password</h2>
-      <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      <button type="submit">Send Reset Email</button>
-      <h4>{message}</h4>
-    </form>
+  return (<>
+    <Header>
+    <Logo>InstaLinked</Logo>
+  </Header>
+    <StyledForm onSubmit={handleRequest}>
+    <StyledHeading>Reset Password</StyledHeading>
+    <StyledInput type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+    <StyledButton type="submit">Send Reset Email</StyledButton>
+    <StyledMessage>{message}</StyledMessage>
+  </StyledForm>
+  </>
   );
 };
 
 export default ResetPasswordRequest;
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height:8vh;
+  padding: 15px 30px;
+  background:#006D77;
+  color: white;
+  font-weight: bold;
+`;
+
+const Logo = styled.div`font-size: 20px;`;
+const StyledForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  align-items: center;  
+  padding: 20px;
+  border: 1px solid #ccc; // Optional border
+  border-radius: 5px;   // Optional rounded corners
+  width: 300px;        // Set a width for the form
+  margin: auto auto;       // Center the form on the page
+`;
+
+const StyledHeading = styled.h2`
+  margin-bottom: 15px;
+  color: #333; // Example color
+`;
+
+const StyledInput = styled.input`
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-sizing: border-box; // Prevent padding from increasing width
+`;
+
+const StyledButton = styled.button`
+  background: #006D77;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+
+  &:hover {
+    background: #005662; // Darker shade on hover
+  }
+`;
+
+const StyledMessage = styled.h4`
+  margin-top: 15px;
+  color: ${(props) => (props.children.includes("Reset link") ? "green" : "red")}; // Conditional color
+`;

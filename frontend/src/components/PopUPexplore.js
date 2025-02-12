@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate,useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../style/popupModal.css";
+import default_user from "../assets/default_user.jpg";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 const PopUPexplore = () => {
@@ -12,17 +13,13 @@ const PopUPexplore = () => {
     const location = useLocation();
 
     const closeModal = () => {
-        
         if (location.state?.background) {
-            console.log("HIIIIIIIIIIIIIIIIII",location.state?.background)
-            navigate(location.state.background.pathname, { replace: true });// ✅ Return to the previous Explore state
+            navigate(location.state.background.pathname, { replace: true }); // ✅ Return to the previous Explore state
         } else {
-            
             navigate("/explore-page"); // If no state, go to explore normally
         }
     };
 
-  
     useEffect(() => {
         const fetchRandomPosts = async () => {
             try {
@@ -36,7 +33,6 @@ const PopUPexplore = () => {
                 console.error("Error fetching posts:", error.response?.data || error.message);
             }
         };
-        
         fetchRandomPosts();
     }, []); // Run only once when component mounts
 
@@ -56,7 +52,7 @@ const PopUPexplore = () => {
     if (!currentPost) return <p>Loading...</p>;
 
     return (
-        <div className="modal-overlay" onClick={() => navigate("/")}>
+        <div className="modal-overlay" onClick={() => navigate("/")}> 
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <span className="close-btn" onClick={closeModal}>&times;</span>
 
@@ -80,22 +76,21 @@ const PopUPexplore = () => {
                         {currentPost.content_type === "image" && <img src={currentPost.url} alt="Post" className="modal-media" />}
                         {currentPost.content_type === "documentary" && <video src={currentPost.url} controls autoPlay className="modal-media" />}
                         {currentPost.content_type === "reel" && <video src={currentPost.url} controls autoPlay className="modal-media" />}
-                        {currentPost.content_type === "pdf" && <embed src={currentPost.url} className="modal-pdf" title="PDF Viewer"/>}
+                        {currentPost.content_type === "pdf" && <embed src={currentPost.url} className="modal-pdf" title="PDF Viewer" />}
                     </div>
 
                     <div className="post-details">
                         <div className="post-header">
-                            <img src={currentPost.user?.profilePicture || "https://via.placeholder.com/50"} alt="User" className="user-avatar" />
+                            <img src={default_user} alt="User" className="user-avatar" />
                             <span className="username">{currentPost.user?.username || "Unknown User"}</span>
                         </div>
 
-                        <p className="likes">{currentPost.likes} Likes</p>
+                        {/* Static Likes and Comments */}
+                        <p className="likes">100 Likes</p>
                         <div className="comments">
-                            {currentPost.comments?.map((comment, index) => (
-                                <p key={index}>
-                                    <strong>{comment.username}</strong> {comment.text}
-                                </p>
-                            ))}
+                            <p><strong>User1</strong> Great post!</p>
+                            <p><strong>User2</strong> Love this!</p>
+                            <p><strong>User3</strong> Amazing content!</p>
                         </div>
                     </div>
                 </div>

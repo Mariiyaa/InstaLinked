@@ -6,6 +6,8 @@ import AppNavbar from './AppNavbar'
 
 const Explore = () => {
     const [posts, setPosts] = useState([]);
+    const [filteredPosts, setFilteredPosts] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);
     const videoRefs = useRef({});
     const navigate=useNavigate()
     useEffect(() => {
@@ -13,8 +15,10 @@ const Explore = () => {
             try {
                 const response = await axios.get('/api/explore/explore-page');
                 if (Array.isArray(response.data)) {
-                    setPosts(arrangePosts(response.data));
-                    console.log(posts)
+                    const arranged = arrangePosts(response.data);
+                    setPosts(arranged);
+                    setFilteredPosts(arranged); 
+                    
                 } else {
                     console.error('Response data is not an array:', response.data);
                 }
@@ -25,6 +29,22 @@ const Explore = () => {
 
         fetchPosts();
     }, []);
+  // Filter posts when category changes
+  useEffect(() => {
+    if (selectedCategory) {
+        // Only show posts that match the selected category
+        setFilteredPosts(
+            posts.filter(
+                (post) =>
+                    post.category && post.category.toLowerCase() === selectedCategory.toLowerCase()
+            )
+        );
+    } else {
+        // Show all posts when no category is selected
+        setFilteredPosts(posts);
+    }
+}, [selectedCategory, posts]);
+    
 
     const handleVideoPreview = (id) => {
         const video = videoRefs.current[id];
@@ -38,6 +58,7 @@ const Explore = () => {
     };
 
     const renderPost = (post) => {
+        
         switch (post.content_type) {
             case 'image':
                 return <img src={post.url} alt="Post" className='explore-image' />;
@@ -188,9 +209,21 @@ const Explore = () => {
     return (
         <>
         <AppNavbar />
+        <div className="filter-buttons">
+            {['Heritage', 'Music', 'Art', 'Story', 'Research'].map(category => (
+                <button
+                    key={category}
+                    className={`filter-btn ${selectedCategory === category ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                >
+                    {category}
+                </button>
+            ))}
+        </div>
         <div className="explore-grid">
-            {posts.length > 0 ? (
-                posts.map(post => (
+        
+            {filteredPosts.length > 0 ? (
+                filteredPosts.map(post => (
                     <div
                         key={post._id}
                         className={`explore-item ${
