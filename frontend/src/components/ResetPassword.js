@@ -62,7 +62,7 @@ const StyledForm = styled.form`
   border: 1px solid #ccc; // Optional border
   border-radius: 5px;   // Optional rounded corners
   width: 300px;        // Set a width for the form
-  margin: auto auto;       // Center the form on the page
+     // Center the form on the page
 `;
 
 const StyledHeading = styled.h2`
