@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs')
+const bycrptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 const speakeasy = require('speakeasy');
@@ -130,7 +130,7 @@ const verifyUser=async (req, res) => {
       console.log("sucessss")
       console.log("Password:", Password,email,otp);
 
-      const hashedPassword = await bcrypt.hash(Password, 10);
+      const hashedPassword = await bycrptjs.hash(Password, 10);
       
       user.otp=undefined
       user.password=hashedPassword
@@ -172,7 +172,7 @@ const login = async (req, res) => {
     }
 
     // Verify password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bycrptjs.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -293,7 +293,7 @@ const resetPassword = async (req, res) => {
     if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
 
     // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const hashedPassword = await bycrptjs.hash(newPassword, 12);
 
     // Update user password and clear reset token
     user.password = hashedPassword;
