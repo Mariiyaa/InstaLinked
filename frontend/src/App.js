@@ -16,11 +16,11 @@ import PersonaSelection from "./components/PersonaSelection";
 import ContentSelection from "./components/ContentSelection";
 import NameSelection from "./components/NameSelection";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+
 import CreatePost from "./components/CreatePost";
 
 
-axios.defaults.baseURL = process.env.REACT_APP_PORT
+axios.defaults.baseURL = process.env.REACT_APP_BACK_PORT
 axios.defaults.withCredentials = true
 
 
