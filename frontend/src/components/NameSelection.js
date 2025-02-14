@@ -8,9 +8,9 @@ const NameSelection = () => {
   const email = location.state?.email || localStorage.getItem("userEmail");
 
   const navigate = useNavigate();
-
+console.log(email)
   const handleSubmit = () => {
-    navigate("/persona-selection", { state: { email, name } });
+    navigate("/persona-selection", { state: { email:email,  name:name } });
   };
 
   return (

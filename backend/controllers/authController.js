@@ -75,6 +75,37 @@ console.log(email,password)
 };
 
 
+const SignUpWithGoogle = async (req, res) => {
+  const { firebaseToken } = req.body;
+  console.log(firebaseToken);
+
+  try {
+    if (!firebaseToken) return res.status(400).json({ message: 'Firebase token is required' });
+    const decodedFirebaseToken = await verifyFirebaseToken(firebaseToken);
+    console.log(decodedFirebaseToken)
+    let user = await User.findOne({ email: decodedFirebaseToken.email });
+
+    if (!user) {
+      user = new User({ email: decodedFirebaseToken.email, password: null });
+      await user.save();
+    }
+    else if(user){
+      return res.status(400).json({ message: 'User already exists' });
+    }
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.json({
+      token,
+      user: {
+        email: user.email || "",
+        
+      },
+    });
+  } catch (error) {
+    console.error('LoginWithGoogle Error:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
 
 
 
@@ -309,6 +340,7 @@ const resetPassword = async (req, res) => {
 };
 
 module.exports = {
+  SignUpWithGoogle,
   register,
   login,
   loginWithGoogle,

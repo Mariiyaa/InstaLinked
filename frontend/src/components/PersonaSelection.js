@@ -22,6 +22,7 @@ const PersonaSelection = () => {
   ];
 
   const handlePersonaSelect = (persona) => {
+    
     if (selectedPersonas.includes(persona)) {
       setSelectedPersonas((prev) => prev.filter((p) => p !== persona));
     } else if (selectedPersonas.length < 3) {
@@ -30,6 +31,7 @@ const PersonaSelection = () => {
   };
 
   const handleSubmit = async () => {
+    console.log(Name,userEmail)
     if (!userEmail) {
       setErrorMessage('User email is missing! Please log in again.');
       return;

@@ -51,12 +51,15 @@ const Signup = () => {
       const idToken = await result.user.getIdToken(); 
 
       console.log("Google Login ID Token:", idToken);
-      const response = await axios.post("/api/auth/login-google", { firebaseToken: idToken });
-      console.log(response.data.name)
-      navigate("/your-name",{state:response.data.name});
+      const response = await axios.post("/api/auth/signup-google", { firebaseToken: idToken });
+      console.log(response.data.user.email)
+      navigate("/your-name",{state:{email:response.data.user.email}});
     } catch (error) {
-      console.error(error);
-      setError("Google login failed.")
+      if (error.response && error.response.data && error.response.data.message) {
+        setError(error.response.data.message); // Set error from backend
+      } else {
+        setError(error); // Fallback message
+      }
     }
   };
 
