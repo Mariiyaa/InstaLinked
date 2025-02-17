@@ -17,8 +17,7 @@ const Explore = () => {
             try {
                 const response = await axios.get('/api/explore/explore-page');
                 if (Array.isArray(response.data)) {
-                    const arranged = arrangePosts(response.data);
-                    localStorage.setItem('storedPosts', JSON.stringify(arranged)); // Store arranged posts
+                    const arranged = arrangePosts(response.data); // Store arranged posts
                     setPosts(arranged);
                     setFilteredPosts(arranged);
                 } else {
@@ -27,11 +26,9 @@ const Explore = () => {
             } catch (error) {
                 console.error('Error fetching posts:', error.response?.data || error.message);
             }
-        };
-    
-        // Check if page was refreshed
+        }
 fetchPosts()
-    }, [location.state]);
+    }, []);
 
     const handleVideoPreview = (id) => {
         const video = videoRefs.current[id];

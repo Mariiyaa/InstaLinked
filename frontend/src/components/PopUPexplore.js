@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate,useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "../style/popupModal.css";
 import default_user from "../assets/default_user.jpg";
@@ -11,14 +11,15 @@ const PopUPexplore = () => {
     const navigate = useNavigate();
     const [posts, setPosts] = useState([]);
     const [currentPost, setCurrentPost] = useState(null);
-    const {postId}=useParams()
+    const { postId } = useParams();
 
     useEffect(() => {
-        const fetchPosts = async () => {
+        const fetchRandomPosts = async () => {
             try {
-                const response = await axios.get("/api/explore/explore-page");
+                const response = await axios.get("/api/explore/explore-page?random=true");
                 if (Array.isArray(response.data)) {
                     setPosts(response.data);
+                    // Find the current post in the new data
                     const initialPost = response.data.find((p) => p._id === postId);
                     setCurrentPost(initialPost || response.data[0]);
                 }
@@ -26,8 +27,9 @@ const PopUPexplore = () => {
                 console.error("Error fetching posts:", error.response?.data || error.message);
             }
         };
-        fetchPosts();
-    }, [postId]);
+        
+        fetchRandomPosts();
+    }, [postId]); // Add postId as a dependency
 
     const handleNavigate = (direction) => {
         if (!posts.length || !currentPost) return;
@@ -36,18 +38,31 @@ const PopUPexplore = () => {
         if (currentIndex !== -1) {
             const newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
             if (newIndex >= 0 && newIndex < posts.length) {
-                setCurrentPost(posts[newIndex]);
-                navigate(`/explore-page/${posts[newIndex]._id}`);
+                const nextPost = posts[newIndex];
+                setCurrentPost(nextPost);
+                window.history.replaceState(null, "", `/p/${nextPost._id}`);
+                
             }
         }
     };
 
-    if (!currentPost) return <p>Loading...</p>;
+    // Return early if no posts are loaded yet
+    if (!posts.length) return <p>Loading posts...</p>;
+    
+    // Return early if current post cannot be found
+    if (!currentPost) {
+        const firstPost = posts[0];
+        if (firstPost) {
+            setCurrentPost(firstPost);
+            navigate(`/p/${firstPost._id}`, { replace: true });
+        }
+        return <p>Loading post...</p>;
+    }
 
     return (
         <div className="modal-overlay" onClick={() => navigate(-1)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="close-btn"  onClick={() => navigate(-1)}>&times;</button>
+                <button className="close-btn" onClick={() => navigate(-1)}>&times;</button>
 
                 {/* User Details */}
                 <div className="user-details">
