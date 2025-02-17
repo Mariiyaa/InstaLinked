@@ -73,10 +73,10 @@ const PopUPexplore = () => {
 
                 <div className="modal-body">
                     <div className="media-container">
-                        {currentPost.content_type === "image" && <img src={currentPost.url} alt="Post" className="modal-media" />}
-                        {currentPost.content_type === "documentary" && <video src={currentPost.url} controls autoPlay className="modal-media" />}
-                        {currentPost.content_type === "reel" && <video src={currentPost.url} controls autoPlay className="modal-media" />}
-                        {currentPost.content_type === "pdf" && <embed src={currentPost.url} className="modal-pdf" title="PDF Viewer" />}
+                        {currentPost.content_type === "Image" && <img src={currentPost.url} alt="Post" className="modal-media" />}
+                        {currentPost.content_type === "Documentary" && <video src={currentPost.url} controls autoPlay className="modal-media" />}
+                        {currentPost.content_type === "Reel" && <video src={currentPost.url} controls autoPlay className="modal-media" />}
+                        {currentPost.content_type === "Pdf" && <embed src={currentPost.url} className="modal-pdf" title="PDF Viewer" />}
                     </div>
 
                     <div className="post-details">
