@@ -37,7 +37,7 @@ const PopUPexplore = () => {
             const newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
             if (newIndex >= 0 && newIndex < posts.length) {
                 setCurrentPost(posts[newIndex]);
-                navigate(`/explore/${posts[newIndex]._id}`);
+                navigate(`/explore-page/${posts[newIndex]._id}`);
             }
         }
     };
