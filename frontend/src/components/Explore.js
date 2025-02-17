@@ -62,7 +62,7 @@ const Explore = () => {
         switch (post.content_type) {
             case 'Image':
                 return <img src={post.url} alt="Post" className='explore-image' />;
-            case 'reel':
+            case 'Reel':
                 return (
                     <video
                         ref={(el) => (videoRefs.current[post._id] = el)}
@@ -112,9 +112,9 @@ const Explore = () => {
     };
 
     const arrangePosts = (posts) => {
-        let pdfs = posts.filter(post => post.content_type === 'pdf');
-        let reels = posts.filter(post => post.content_type === 'reel');
-        let otherPosts = posts.filter(post => !['pdf', 'reel'].includes(post.content_type));
+        let pdfs = posts.filter(post => post.content_type === 'Pdf');
+        let reels = posts.filter(post => post.content_type === 'Reel');
+        let otherPosts = posts.filter(post => !['Pdf', 'Reel'].includes(post.content_type));
     
         let arrangedPosts = [];
         let usedOtherIndexes = new Set(); // Track used otherPosts to prevent duplicates
