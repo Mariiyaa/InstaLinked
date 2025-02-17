@@ -60,7 +60,7 @@ const Explore = () => {
     const renderPost = (post) => {
         
         switch (post.content_type) {
-            case 'image':
+            case 'Image':
                 return <img src={post.url} alt="Post" className='explore-image' />;
             case 'reel':
                 return (
@@ -72,14 +72,14 @@ const Explore = () => {
                         muted
                     />
                 );
-            case 'documentary':
+            case 'Documentary':
                 return (
                     <div className="documentary-wrapper">
                         <video src={post.url} className='explore-image' muted />
                         <span className="documentary-icon">🎥</span>
                     </div>
                 );
-            case 'pdf':
+            case 'Pdf':
                 return (
                     <div 
                         className="explore-pdf-wrapper"
