@@ -1,50 +1,43 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate,useParams } from "react-router-dom";
 import axios from "axios";
 import "../style/popupModal.css";
 import default_user from "../assets/default_user.jpg";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import disk from "../assets/disk.jpg";
+import '../App.css'
 
 const PopUPexplore = () => {
-    const { postId } = useParams();
     const navigate = useNavigate();
     const [posts, setPosts] = useState([]);
     const [currentPost, setCurrentPost] = useState(null);
-    const location = useLocation();
-
-    const closeModal = () => {
-        if (location.state?.background) {
-            navigate(location.state.background.pathname, { replace: true }); // ✅ Return to the previous Explore state
-        } else {
-            navigate("/explore-page"); // If no state, go to explore normally
-        }
-    };
+    const {postId}=useParams()
 
     useEffect(() => {
-        const fetchRandomPosts = async () => {
+        const fetchPosts = async () => {
             try {
-                const response = await axios.get("/api/explore/explore-page?random=true");
+                const response = await axios.get("/api/explore/explore-page");
                 if (Array.isArray(response.data)) {
                     setPosts(response.data);
                     const initialPost = response.data.find((p) => p._id === postId);
-                    setCurrentPost(initialPost || response.data[0]); // Show selected or first random post
+                    setCurrentPost(initialPost || response.data[0]);
                 }
             } catch (error) {
                 console.error("Error fetching posts:", error.response?.data || error.message);
             }
         };
-        fetchRandomPosts();
-    }, []); // Run only once when component mounts
+        fetchPosts();
+    }, [postId]);
 
     const handleNavigate = (direction) => {
         if (!posts.length || !currentPost) return;
-        
+
         const currentIndex = posts.findIndex((p) => p._id === currentPost._id);
         if (currentIndex !== -1) {
             const newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
             if (newIndex >= 0 && newIndex < posts.length) {
-                setCurrentPost(posts[newIndex]); // Update state without refetching
-                navigate(`/explore-page/${posts[newIndex]._id}`, { replace: true });
+                setCurrentPost(posts[newIndex]);
+                navigate(`/explore/${posts[newIndex]._id}`);
             }
         }
     };
@@ -52,47 +45,54 @@ const PopUPexplore = () => {
     if (!currentPost) return <p>Loading...</p>;
 
     return (
-        <div className="modal-overlay" onClick={() => navigate("/")}> 
+        <div className="modal-overlay" onClick={() => navigate(-1)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <span className="close-btn" onClick={closeModal}>&times;</span>
+                <button className="close-btn"  onClick={() => navigate(-1)}>&times;</button>
 
-                {posts.length > 1 && (
-                    <>
-                        {posts.findIndex((p) => p._id === currentPost._id) > 0 && (
-                            <button className="nav-button left" onClick={() => handleNavigate("prev")}>
-                                <FaArrowLeft />
-                            </button>
-                        )}
-                        {posts.findIndex((p) => p._id === currentPost._id) < posts.length - 1 && (
-                            <button className="nav-button right" onClick={() => handleNavigate("next")}>
-                                <FaArrowRight />
-                            </button>
-                        )}
-                    </>
-                )}
-
-                <div className="modal-body">
-                    <div className="media-container">
-                        {currentPost.content_type === "image" && <img src={currentPost.url} alt="Post" className="modal-media" />}
-                        {currentPost.content_type === "documentary" && <video src={currentPost.url} controls autoPlay className="modal-media" />}
-                        {currentPost.content_type === "reel" && <video src={currentPost.url} controls autoPlay className="modal-media" />}
-                        {currentPost.content_type === "pdf" && <embed src={currentPost.url} className="modal-pdf" title="PDF Viewer" />}
+                {/* User Details */}
+                <div className="user-details">
+                    <img src={currentPost.userImage || default_user} alt="User" className="user-img" />
+                    <div>
+                        <p className="user-name">{currentPost.userName || "Unknown User"}</p>
+                        <p className="post-date">{new Date(currentPost.createdAt).toDateString()}</p>
                     </div>
+                </div>
 
-                    <div className="post-details">
-                        <div className="post-header">
-                            <img src={default_user} alt="User" className="user-avatar" />
-                            <span className="username">{currentPost.user?.username || "Unknown User"}</span>
+                {/* Content Display */}
+                <div className="media-container">
+                    {currentPost.content_type === "Image" && (
+                        <img src={currentPost.url} alt="Post" className="modal-image" />
+                    )}
+                    {["Documentary", "Reel"].includes(currentPost.content_type) && (
+                        <video src={currentPost.url} controls className="modal-video" />
+                    )}
+                    {currentPost.content_type === "Pdf" && (
+                        <embed src={currentPost.url} className="modal-pdf" />
+                    )}
+                    {currentPost.content_type === "Audio" && (
+                        <div className="audio-wrapper">
+                            <img src={disk} alt="Audio Disk" className="audio-thumbnail" />
+                            <audio controls src={currentPost.url} className="audio-player"></audio>
                         </div>
+                    )}
+                </div>
 
-                        {/* Static Likes and Comments */}
-                        <p className="likes">100 Likes</p>
-                        <div className="comments">
-                            <p><strong>User1</strong> Great post!</p>
-                            <p><strong>User2</strong> Love this!</p>
-                            <p><strong>User3</strong> Amazing content!</p>
-                        </div>
-                    </div>
+                {/* Navigation Buttons */}
+                <div className="navigation">
+                    <button
+                        className="nav-btn left"
+                        onClick={() => handleNavigate("prev")}
+                        disabled={posts.findIndex((p) => p._id === currentPost._id) === 0}
+                    >
+                        <FaArrowLeft />
+                    </button>
+                    <button
+                        className="nav-btn right"
+                        onClick={() => handleNavigate("next")}
+                        disabled={posts.findIndex((p) => p._id === currentPost._id) === posts.length - 1}
+                    >
+                        <FaArrowRight />
+                    </button>
                 </div>
             </div>
         </div>

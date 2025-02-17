@@ -9,17 +9,25 @@ const router = express.Router(); // ✅ Missing `express.Router()`
 
 // ✅ Correct Cloudinary Storage Configuration
 const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: async (req, file) => {
-      console.log("🔄 Uploading File:", file.originalname);
-      return {
-        folder: "your-folder-name",
-        format: file.mimetype.split("/")[1], // Extract format dynamically
-        resource_type: "auto", // Ensures correct handling of videos, PDFs, etc.
-      };
-    },
-  });
-  
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    console.log("🔄 Uploading File:", file.originalname);
+
+    // Extract the format from the MIME type
+    let format = file.mimetype.split("/")[1];
+
+    // Manually set the format for MP3 files
+    if (file.mimetype === "audio/mpeg") {
+      format = "mp3";
+    }
+
+    return {
+      folder: "your-folder-name",
+      format: format, // Use the extracted or manually set format
+      resource_type: "auto", // Ensures correct handling of videos, PDFs, etc.
+    };
+  },
+});
   const upload = multer({ 
     storage: storage,
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB file limit

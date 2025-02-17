@@ -6,7 +6,7 @@ import axios from "axios";
 
 const contentTypes = {
   Image: "image/*",
-  Video: "reel/*",
+  Reel: "reel/*",
   Audio: "audio/*",
   Pdf: ".pdf,.doc,.docx",
 };

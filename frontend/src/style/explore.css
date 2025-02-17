@@ -56,6 +56,14 @@
     object-fit: cover; 
     display: block;
 }
+.explore-doc {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    display: block;
+    aspect-ratio: 1 / 1; 
+}
 
 
 .explore-reel {
@@ -108,5 +116,4 @@
     color: #fff; /* White text */
 
   }
-  
 

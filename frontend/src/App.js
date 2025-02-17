@@ -1,7 +1,7 @@
 import React from "react";
 import axios from 'axios'
 import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes,useLocation } from "react-router-dom";
 import Login from "./components/Login";
 import ResetPasswordRequest from "./components/ResetPasswordRequest";
 import ResetPassword from "./components/ResetPassword";
@@ -26,6 +26,9 @@ axios.defaults.withCredentials = true
 
 const App = () => {
   const [user, setUser] = useState(null);
+  const location = useLocation();
+  const background = location.state?.background;
+
   useEffect(() => {
     const storedEmail = localStorage.getItem("userEmail");
     if (storedEmail) {
@@ -35,7 +38,8 @@ const App = () => {
   }, []);
 
   return (
-<Router>
+    <>
+
   {/* Show Navbar only for Signup and Login */}
   <Routes>
     <Route path="/"element={
@@ -62,19 +66,41 @@ const App = () => {
     <Route path="/your-name" element={<NameSelection />} />
     <Route path="/persona-selection" element={<PersonaSelection userEmail={user} />} />
     <Route path="/content-selection" element={<ContentSelection userEmail={user} />} />
-    <Route path="/explore-page/:postId" element={<PopUPexplore />} />
+
     <Route path="/Home" element={<Home />} />
     <Route path="/reset-password-request" element={<ResetPasswordRequest />} />
     <Route path="/reset-password/:token" element={<ResetPassword />} />
     <Route path="/my-profile" element={<DisplayProfile />} />
-    <Route path="/explore-page" element={<Explore />} />
-    <Route path="/explore-page/:postId" element={<PopUPexplore />} />
-  </Routes>
-</Router>
+    </Routes>
 
+   <Routes location={background || location}>
+        <Route path="/explore-page" element={<Explore />} />
+      </Routes>
+
+      {background && (
+        <Routes>
+          <Route
+            path="/p/:postId"
+            element={
+              <PopUPexplore/>
+                
+            }
+          />
+        </Routes>
+      )}
+
+
+  </>
   );
 };
 
 
-export default App;
+const Root = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
+export default Root;
+
 
