@@ -56,7 +56,7 @@ const register = async (req, res) => {
     console.log("User saved successfully");
 
     // Respond to the user immediately
-    res.status(201).json({ message: 'User registered successfully. Confirmation and verification emails sent.' });
+    // res.status(201).json({ message: 'User registered successfully. Confirmation and verification emails sent.' });
 
     // Send welcome email
     const welcomeMessage = `Thank you for signing up! Begin your journey with Instalinked.`;
@@ -131,8 +131,6 @@ const resendOtp= async (req, res) => {
     
     const message = `Your new verification code is ${otp}.`;
     await sendEmail(user.email, 'otp verification resend Request', message);
-   
-
     res.status(200).json({ message: 'New OTP sent successfully.' });
   } catch (err) {
     console.error('Error resending OTP:', err);
