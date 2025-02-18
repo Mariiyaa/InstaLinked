@@ -56,7 +56,7 @@ const register = async (req, res) => {
     console.log("User saved successfully");
 
     // Respond to the user immediately
-    // res.status(201).json({ message: 'User registered successfully. Confirmation and verification emails sent.' });
+    
 
     // Send welcome email
     const welcomeMessage = `Thank you for signing up! Begin your journey with Instalinked.`;
@@ -65,7 +65,7 @@ const register = async (req, res) => {
     // Send OTP email
     const otpMessage = `Your verification code is ${otp}.`;
     await sendEmail(newUser.email, 'OTP Verification Request', otpMessage);
-
+    res.status(201).json({ message: 'User registered successfully. Confirmation and verification emails sent.' });
   } catch (error) {
     console.error('Error during signup:', error);
 
@@ -134,7 +134,7 @@ const resendOtp= async (req, res) => {
     res.status(200).json({ message: 'New OTP sent successfully.' });
   } catch (err) {
     console.error('Error resending OTP:', err);
-    res.status(500).json({ message: 'Error resending OTP. Please try again.' });
+    res.status(500).json({ message: err || 'Error resending OTP. Please try again.' });
   }
 }
 
