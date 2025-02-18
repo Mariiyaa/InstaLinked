@@ -33,7 +33,7 @@ const OtpVerification = () => {
       const data = await response.json();
       setMessage(data.message);
     } catch (error) {
-      setMessage(error.response?.data?.message||'Error resending OTP. Please try again.');
+      setMessage(error)
     }
   };
 
