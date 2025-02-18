@@ -29,7 +29,7 @@ const Explore = () => {
             }
         }
 
-if (performance.navigation.type === performance.navigation.TYPE_RELOAD) {
+if (window.location.pathname === '/explore-page'&&performance.navigation.type === performance.navigation.TYPE_RELOAD) {
         // If page was refreshed, clear local storage and fetch new posts
         localStorage.removeItem('storedPosts');
         fetchPosts();

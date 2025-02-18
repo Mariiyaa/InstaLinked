@@ -11,7 +11,7 @@ const ProfileEdit = () => {
   console.log("ProfileEdit received userData:", user);
   const [userProfile, setUserProfile] = useState({
     fullname: "",
-    profileImage: null,
+    profileImage: '',
     bio: "",
     phone: "",
     email: "",
