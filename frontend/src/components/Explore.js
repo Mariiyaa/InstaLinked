@@ -17,7 +17,8 @@ const Explore = () => {
             try {
                 const response = await axios.get('/api/explore/explore-page');
                 if (Array.isArray(response.data)) {
-                    const arranged = arrangePosts(response.data); // Store arranged posts
+                    const arranged = arrangePosts(response.data);
+                    localStorage.setItem('storedPosts', JSON.stringify(arranged));  // Store arranged posts
                     setPosts(arranged);
                     setFilteredPosts(arranged);
                 } else {
@@ -27,8 +28,44 @@ const Explore = () => {
                 console.error('Error fetching posts:', error.response?.data || error.message);
             }
         }
-fetchPosts()
-    }, []);
+
+if (performance.navigation.type === performance.navigation.TYPE_RELOAD) {
+        // If page was refreshed, clear local storage and fetch new posts
+        localStorage.removeItem('storedPosts');
+        fetchPosts();
+    } else {
+        // Check if posts are passed via state or available in localStorage
+        if (location.state?.posts) {
+            setPosts(location.state.posts);
+            setFilteredPosts(location.state.posts);
+        } else {
+            const storedPosts = localStorage.getItem('storedPosts');
+            if (storedPosts) {
+                const parsedPosts = JSON.parse(storedPosts);
+                setPosts(parsedPosts);
+                setFilteredPosts(parsedPosts);
+            } else {
+                fetchPosts();
+            }
+        }
+    }
+}, []);
+useEffect(() => {
+    if (selectedCategory) {
+        const filtered = posts.filter(post => post.category === selectedCategory);
+        const arrangedFilterPosts=arrangePosts(filtered)
+        setFilteredPosts(arrangedFilterPosts);
+    } else {
+        setFilteredPosts(posts);
+    }
+}, [selectedCategory, posts]);
+useEffect(() => {
+    console.log("Posts:", posts);
+    console.log("Filtered Posts:", filteredPosts);
+    console.log("Selected Category:", selectedCategory);
+}, [posts, filteredPosts, selectedCategory]);
+
+
 
     const handleVideoPreview = (id) => {
         const video = videoRefs.current[id];

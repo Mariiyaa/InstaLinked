@@ -22,7 +22,7 @@ const OtpVerification = () => {
         navigate('/your-name',{ state:{email} });
     
     } catch (error) {
-      setMessage('Error verifying OTP. Please try again.');
+      setMessage(error.response?.data?.message||'Error verifying OTP. Please try again.');
     }
   };
 
@@ -33,7 +33,7 @@ const OtpVerification = () => {
       const data = await response.json();
       setMessage(data.message);
     } catch (error) {
-      setMessage('Error resending OTP. Please try again.');
+      setMessage(error.response?.data?.message||'Error resending OTP. Please try again.');
     }
   };
 

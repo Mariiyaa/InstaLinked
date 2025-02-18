@@ -28,7 +28,7 @@ const register = async (req, res) => {
     if (!email || !password || password !== confirmPassword) {
       return res.status(400).json({ message: 'Please provide email, password, and ensure passwords match.' });
     }
-console.log(email,password)
+
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -36,7 +36,6 @@ console.log(email,password)
     }
 
     // Hash password and save user
-    
     const newUser = new User({
       email,
       // password: hashedPassword,
@@ -49,28 +48,31 @@ console.log(email,password)
       step: 300
     });
 
-    console.log('Generated OTP:', otp); 
+    console.log('Generated OTP:', otp);
 
-    //newUser.email=email;// Save the OTP temporarily or with the user (in production, save securely)
-    newUser.otp = otp; // You might want to use a separate collection or temporary store in production
-    await newUser.save().then(
-      console.log("doneee")
-    );
+    // Save the OTP temporarily or with the user (in production, save securely)
+    newUser.otp = otp;
+    await newUser.save();
+    console.log("User saved successfully");
 
     // Respond to the user immediately
     res.status(201).json({ message: 'User registered successfully. Confirmation and verification emails sent.' });
 
+    // Send welcome email
+    const welcomeMessage = `Thank you for signing up! Begin your journey with Instalinked.`;
+    await sendEmail(newUser.email, 'Welcome to Instalinked!', welcomeMessage);
 
-    var message = `Thank you for signing up! Begin your journey with Instalinked.`;
-    await sendEmail(newUser.email, 'Welcome to Instalinked!', message);
-
-    var message = `Your verification code is ${otp}.`;
-    await sendEmail(newUser.email, 'otp verification Request', message);
-  
+    // Send OTP email
+    const otpMessage = `Your verification code is ${otp}.`;
+    await sendEmail(newUser.email, 'OTP Verification Request', otpMessage);
 
   } catch (error) {
     console.error('Error during signup:', error);
-    res.status(500).json({ message: 'Server error.' });
+
+    // Check if headers have already been sent
+    if (!res.headersSent) {
+      res.status(500).json({ message: 'Server error.' });
+    }
   }
 };
 
@@ -113,6 +115,9 @@ const resendOtp= async (req, res) => {
   const { email } = req.body;
 
   try {
+    if (!email) {
+      return res.status(404).json({ message: 'enter your email' });
+    }
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
