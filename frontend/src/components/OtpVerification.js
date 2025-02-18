@@ -22,7 +22,7 @@ const OtpVerification = () => {
         navigate('/your-name',{ state:{email} });
     
     } catch (error) {
-      setMessage(error.response?.data?.message||'Error verifying OTP. Please try again.');
+      setMessage(error);
     }
   };
 
