@@ -28,12 +28,18 @@ const OtpVerification = () => {
 
   const handleResendOtp = async () => {
     try {
-      const response = await axios.post('/api/auth/resend-otp', { email
-      });
-      const data = await response.json();
-      setMessage(data.message);
+      const response = await axios.post('/api/auth/resend-otp', { email });
+  
+      // Check if the response status is 200
+      if (response.status === 200) {
+        setMessage(response.data.message); // Set the message from the response
+      } else {
+        // Handle other status codes if needed
+        setMessage('Unexpected response from the server.');
+      }
     } catch (error) {
-      setMessage(error.response?.data?.message||'Error resending OTP. Please try again.');
+      // Handle errors (network errors, server errors, etc.)
+      setMessage(error.response?.data?.message || 'Error resending OTP. Please try again.');
     }
   };
 
