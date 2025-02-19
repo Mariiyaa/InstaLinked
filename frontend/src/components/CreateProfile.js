@@ -147,7 +147,7 @@ const ProfileEdit = () => {
                 onChange={(e) => setUserProfile({ ...userProfile, bio: e.target.value })}
                 
               ></Textarea>
-
+              <p> Date of Birth :</p>
               <Row>
                 <Input
                   type="date"
