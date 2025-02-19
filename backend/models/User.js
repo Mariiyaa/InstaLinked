@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   gender: { type: String, enum: ["Male", "Female", "Other"] },
   location: { type: String },
   occupation: { type: String },
-  persona: { type: [String], enum: ['Heritage Lover', 'Explorer', 'Researcher', 'Practitioner', 'Conservator', 'Artist'], default: null },    
+  persona: { type: [String], enum: ['Heritage Lover', 'Explorer', 'Researcher', 'Practitioner', 'Conservator', 'Artist',''], default: null },    
   contentPreferences: { type: [String], default: [] },
   externalLinks: { type: [String] },
   password: { type: String}, // Password should always be required.

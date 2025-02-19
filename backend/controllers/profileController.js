@@ -30,42 +30,46 @@ const upload = multer({
       console.log("Request Body:", req.body);
       console.log("Request File:", req.file);
   
-      const { fullname, bio, phone, dateOfBirth, gender, location, occupation, personas, contentPreferences, externalLinks, email } = req.body;
+      const { fullName, bio, phone, dateOfBirth, gender, location, occupation, personas, contentPreferences, externalLinks, email } = req.body;
   
       if (!email) {
         return res.status(400).json({ message: "Email is required" });
       }
   
-      // Profile image handling
+      // Handle profile image
       const profileImagePath = req.file ? req.file.path.replace(/\\/g, "/") : null;
   
-      // Find user by email
+      // Find existing user by email
       const existingUser = await User.findOne({ email });
   
       if (!existingUser) {
         return res.status(404).json({ message: "User not found" });
       }
   
-      // Update user profile fields
-      if (fullname) existingUser.fullName = fullname;
-      if (profileImagePath) existingUser.profileImage = profileImagePath;
-      if (bio) existingUser.bio = bio;
-      if (phone) existingUser.phone = phone;
-      if (dateOfBirth) existingUser.dateOfBirth = new Date(dateOfBirth);
-      if (gender) existingUser.gender = gender;
-      if (location) existingUser.location = location;
-      if (occupation) existingUser.occupation = occupation;
+      // Update fields only if a new value is provided
+      if (fullName != null) existingUser.fullName = fullName;
+      if (profileImagePath != null) existingUser.profileImage = profileImagePath;
+      if (bio != null) existingUser.bio = bio;
+      if (phone != null) existingUser.phone = phone;
+      if (dateOfBirth != null) existingUser.dateOfBirth = new Date(dateOfBirth);
+      if (gender != null) existingUser.gender = gender;
+      if (location != null) existingUser.location = location;
+      if (occupation != null) existingUser.occupation = occupation;
   
-      // Convert personas to an array if it's a comma-separated string
-      if (personas) {
+      // Update personas and contentPreferences (convert to arrays if provided)
+      if (personas != null) {
         existingUser.persona = Array.isArray(personas) ? personas : personas.split(",").map(p => p.trim());
       }
-  
-      if (contentPreferences) {
-        existingUser.contentPreferences = Array.isArray(contentPreferences) ? contentPreferences : contentPreferences.split(",").map(p => p.trim());
+      if (contentPreferences != null) {
+        existingUser.contentPreferences = Array.isArray(contentPreferences)
+          ? contentPreferences
+          : contentPreferences.split(",").map(p => p.trim());
       }
   
-      if (externalLinks) existingUser.externalLinks = JSON.parse(externalLinks);
+      // Update external links (ensure valid JSON)
+      if (externalLinks != null) {
+        existingUser.externalLinks = JSON.parse(externalLinks);
+      }
   
       // Save the updated profile
       await existingUser.save();
@@ -79,6 +83,8 @@ const upload = multer({
       res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
   };
+  
+  
   
 const displayProfile = async(req,res) => {
     const email="mariyaa.d6@gmail.com"

@@ -36,7 +36,8 @@ const ProfileEdit = () => {
     if (user) {
       setUserProfile((prev) => ({
         ...prev,
-        ...user, 
+        ...user,
+        fullName:user.fullName,
         contentPreferences:user.contentPreferences || [],
         personas: user.personas || [],// Use data from context
         profileImage: user.profileImage || null,
@@ -119,7 +120,7 @@ const ProfileEdit = () => {
                   placeholder="Occupation"
                   value={userProfile.occupation}
                   onChange={(e) => setUserProfile({ ...userProfile, occupation: e.target.value })}
-                  
+                  required
                 />
               </Row>
 
@@ -129,14 +130,14 @@ const ProfileEdit = () => {
                   placeholder="Phone Number"
                   value={userProfile.phone}
                   onChange={(e) => setUserProfile({ ...userProfile, phone: e.target.value })}
-                  
+                  required
                 />
                 <Input
                   type="email"
                   placeholder="Email address"
                   value={userProfile.email}
                   onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
-                  
+                  required
                 />
               </Row>
 
@@ -151,11 +152,14 @@ const ProfileEdit = () => {
                 <Input
                   type="date"
                   value={userProfile.dateOfBirth}
+                  max={new Date().toISOString().split("T")[0]}
                   onChange={(e) => setUserProfile({ ...userProfile, dateOfBirth: e.target.value })}
+                  required
                 />
                 <Select
                   value={userProfile.gender}
                   onChange={(e) => setUserProfile({ ...userProfile, gender: e.target.value })}
+                  required
                 >
                   <option value="">Gender</option>
                   <option value="Male">Male</option>
