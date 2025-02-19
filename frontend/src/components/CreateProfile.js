@@ -19,8 +19,8 @@ const ProfileEdit = () => {
     gender: "",
     location: "",
     occupation: "",
-    persona: [""],
-    contentPreferences: [""],
+    persona: [],
+    contentPreferences: [],
     externalLinks: [""],
   });
 
