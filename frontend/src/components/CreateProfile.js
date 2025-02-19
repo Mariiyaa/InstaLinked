@@ -100,7 +100,7 @@ const ProfileEdit = () => {
     {userProfile.profileImage ? (
       <ProfileImage src={userProfile.profileImage} alt="Profile Preview" />
     ) : (
-      "📷 Upload Photo"
+      <p style={{textAlign:"center"}}> Upload Photo</p>
     )}
   </Label>
 </ProfilePhoto>
@@ -116,7 +116,7 @@ const ProfileEdit = () => {
                 />
                 <Input
                   type="text"
-                  placeholder="Headline"
+                  placeholder="Occupation"
                   value={userProfile.occupation}
                   onChange={(e) => setUserProfile({ ...userProfile, occupation: e.target.value })}
                   
@@ -451,8 +451,8 @@ const ProfilePhoto = styled.div`
 const Label = styled.label`
   background: #ececec;
   border-radius: 50%;
-  height: 100px;
-  width: 100px;
+  height: 150px;
+  width: 150px;
   cursor: pointer;
   display: flex;
   align-items: center;
