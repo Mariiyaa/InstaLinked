@@ -111,8 +111,8 @@ const ProfileEdit = () => {
                   type="text"
                   placeholder="Full Name"
                   value={userProfile.fullName}
-                  onChange={(e) => setUserProfile({ ...userProfile, fullname: e.target.value })}
-                  
+                  onChange={(e) => setUserProfile({ ...userProfile, fullName: e.target.value })}
+                  required
                 />
                 <Input
                   type="text"
