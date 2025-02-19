@@ -119,7 +119,7 @@ const ProfileEdit = () => {
                   placeholder="Headline"
                   value={userProfile.occupation}
                   onChange={(e) => setUserProfile({ ...userProfile, occupation: e.target.value })}
-                  required
+                  
                 />
               </Row>
 
@@ -129,14 +129,14 @@ const ProfileEdit = () => {
                   placeholder="Phone Number"
                   value={userProfile.phone}
                   onChange={(e) => setUserProfile({ ...userProfile, phone: e.target.value })}
-                  required
+                  
                 />
                 <Input
                   type="email"
                   placeholder="Email address"
                   value={userProfile.email}
                   onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
-                  required
+                  
                 />
               </Row>
 
@@ -144,7 +144,7 @@ const ProfileEdit = () => {
                 placeholder="About you"
                 value={userProfile.bio}
                 onChange={(e) => setUserProfile({ ...userProfile, bio: e.target.value })}
-                required
+                
               ></Textarea>
 
               <Row>
