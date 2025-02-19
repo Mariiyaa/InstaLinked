@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import styled from 'styled-components';
-
+import logo from '../assets/logo.svg'
 const ResetPassword = () => {
   const { token } = useParams();
   const [newPassword, setNewPassword] = useState("");
@@ -26,7 +26,7 @@ const ResetPassword = () => {
 
   return (<>
    <Header>
-    <Logo>InstaLinked</Logo>
+    <Logo src={logo}></Logo>
   </Header>
     <StyledForm onSubmit={handleReset}>
       <StyledHeading>Set New Password</StyledHeading>
@@ -53,7 +53,7 @@ const Header = styled.div`
   font-weight: bold;
 `;
 
-const Logo = styled.div`font-size: 20px;`;
+const Logo = styled.img`font-size: 20px;`;
 const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
@@ -62,7 +62,9 @@ const StyledForm = styled.form`
   border: 1px solid #ccc; // Optional border
   border-radius: 5px;   // Optional rounded corners
   width: 300px;        // Set a width for the form
-     // Center the form on the page
+  position:absolute;
+  bottom:50%;
+  left:40%;       // Center the form on the page
 `;
 
 const StyledHeading = styled.h2`
@@ -92,4 +94,7 @@ const StyledButton = styled.button`
   }
 `;
 
-
+const StyledMessage = styled.h4`
+  margin-top: 15px;
+  color: ${(props) => (props.children.includes("Reset link") ? "green" : "red")}; // Conditional color
+`;

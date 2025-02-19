@@ -10,7 +10,7 @@ const ProfileEdit = () => {
 
   console.log("ProfileEdit received userData:", user);
   const [userProfile, setUserProfile] = useState({
-    fullname: "",
+    fullName: "",
     profileImage: '',
     bio: "",
     phone: "",
@@ -19,8 +19,8 @@ const ProfileEdit = () => {
     gender: "",
     location: "",
     occupation: "",
-    personas: "",
-    contentPreferences: "",
+    persona: [""],
+    contentPreferences: [""],
     externalLinks: [""],
   });
 
@@ -36,7 +36,9 @@ const ProfileEdit = () => {
     if (user) {
       setUserProfile((prev) => ({
         ...prev,
-        ...user, // Use data from context
+        ...user, 
+        contentPreferences:user.contentPreferences || [],
+        personas: user.personas || [],// Use data from context
         profileImage: user.profileImage || null,
       }));
     }
@@ -108,9 +110,9 @@ const ProfileEdit = () => {
                 <Input
                   type="text"
                   placeholder="Full Name"
-                  value={userProfile.fullname}
+                  value={userProfile.fullName}
                   onChange={(e) => setUserProfile({ ...userProfile, fullname: e.target.value })}
-                  required
+                  
                 />
                 <Input
                   type="text"
@@ -170,24 +172,170 @@ const ProfileEdit = () => {
                   onChange={(e) => setUserProfile({ ...userProfile, location: e.target.value })}
                 />
               </Row>
+             {/* Personas Selector */}
+<select
+  multiple
+  value={userProfile.persona || []}
+  onChange={(e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
 
-              <Select
-                value={userProfile.personas}
-                onChange={(e) => setUserProfile({ ...userProfile, personas: e.target.value })}
-              >
-                <option>Select personas...</option>
-                <option>Heritage Lover</option>
-                <option>Explorer</option>
-              </Select>
+    // Update state while avoiding duplicates
+    setUserProfile((prevProfile) => ({
+      ...prevProfile,
+      persona: Array.from(new Set([...prevProfile.persona, ...selectedOptions])),
+    }));
+  }}
+  style={{
+    width: '100%',
+    padding: '5px',
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    height: '120px', // Allow space for multiple selections
+  }}
+>
+  <option value="Heritage Lover">Heritage Lover</option>
+  <option value="Explorer">Explorer</option>
+  <option value="Researcher">Researcher</option>
+  <option value="Practitioner">Practitioner</option>
+  <option value="Conservator">Conservator</option>
+  <option value="Artist">Artist</option>
+</select>
 
-              <Select
-                value={userProfile.contentPreferences}
-                onChange={(e) => setUserProfile({ ...userProfile, contentPreferences: e.target.value })}
-              >
-                <option>Content Preferences</option>
-                <option>Article</option>
-                <option>Videos</option>
-              </Select>
+{/* Display selected persona */}
+<div
+  style={{
+    marginTop: "10px",
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: "10px",
+    border: "1px solid #ccc",
+    padding: "5px",
+    borderRadius: "5px",
+    minHeight: "40px",
+  }}
+>
+  {userProfile.persona && userProfile.persona.length > 0 ? (
+    userProfile.persona.map((persona) => (
+      <div
+        key={persona}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          backgroundColor: "#006D77",
+          padding: "5px 10px",
+          borderRadius: "5px",
+          fontSize: "14px",
+        }}
+      >
+        <p style={{ color: 'white' }}>{persona}</p>
+        <button
+          onClick={() => {
+            const updatedpersona = userProfile.persona.filter((p) => p !== persona);
+            setUserProfile({ ...userProfile, persona: updatedpersona });
+          }}
+          style={{
+            marginLeft: "8px",
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+            color: "#ffffff",
+            fontWeight: "bold",
+          }}
+        >
+          ✕
+        </button>
+      </div>
+    ))
+  ) : (
+    <span style={{ color: "#777", fontStyle: "italic" }}>No personas selected</span>
+  )}
+</div>
+
+{/* Content Preferences Selector */}
+<select
+  multiple
+  value={userProfile.contentPreferences || []}
+  onChange={(e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
+
+    // Update state while avoiding duplicates
+    setUserProfile((prevProfile) => ({
+      ...prevProfile,
+      contentPreferences: Array.from(new Set([...prevProfile.contentPreferences, ...selectedOptions])),
+    }));
+  }}
+  style={{
+    width: '100%',
+    padding: '5px',
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    height: '120px', // Allow space for multiple selections
+  }}
+>
+  <option value="Articles">Articles</option>
+  <option value="Songs">Songs</option>
+  <option value="Research Papers">Research Papers</option>
+  <option value="Short Videos">Short Videos</option>
+  <option value="Documented Videos">Documented Videos</option>
+  <option value="Music">Music</option>
+  <option value="Art">Art</option>
+  <option value="Sculptures">Sculptures</option>
+  <option value="Monuments">Monuments</option>
+  <option value="Folklores">Folklores</option>
+</select>
+
+{/* Display selected content preferences */}
+<div
+  style={{
+    marginTop: "10px",
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: "10px",
+    border: "1px solid #ccc",
+    padding: "5px",
+    borderRadius: "5px",
+    minHeight: "40px",
+  }}
+>
+  {userProfile.contentPreferences && userProfile.contentPreferences.length > 0 ? (
+    userProfile.contentPreferences.map((content) => (
+      <div
+        key={content}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          backgroundColor: "#006D77",
+          padding: "5px 10px",
+          borderRadius: "5px",
+          fontSize: "14px",
+        }}
+      >
+        <p style={{ color: 'white' }}>{content}</p>
+        <button
+          onClick={() => {
+            const updatedContent = userProfile.contentPreferences.filter((p) => p !== content);
+            setUserProfile({ ...userProfile, contentPreferences: updatedContent });
+          }}
+          style={{
+            marginLeft: "8px",
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+            color: "#ffffff",
+            fontWeight: "bold",
+          }}
+        >
+          ✕
+        </button>
+      </div>
+    ))
+  ) : (
+    <span style={{ color: "#777", fontStyle: "italic" }}>No content preferences selected</span>
+  )}
+</div>
+
 
               <h3>Portfolio Links</h3>
               {userProfile.externalLinks.map((link, index) => (
@@ -353,7 +501,7 @@ const ButtonRow = styled.div`
 
 const Button = styled.button`
   padding: 10px;
-  background: #006D77;
+  background:#006D77 ;
   border-radius:5px;
   font-size:16px;
   color: white;

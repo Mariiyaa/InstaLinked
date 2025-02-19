@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import '../style/explore.css';
 import AppNavbar from './AppNavbar';
 import disk from '../assets/disk.jpg'
+import { FaFilm, FaMicrophone} from 'react-icons/fa';
 
 const Explore = () => {
     const [posts, setPosts] = useState([]);
@@ -96,45 +97,73 @@ useEffect(() => {
                 return (
                     <div className="documentary-wrapper">
                         <video src={post.url} className='explore-doc' muted />
-                        <span className="documentary-icon">🎥</span>
+                        <span className="documentary-icon"><FaFilm size={30}style={{position:'absolute',color:'white',top:0,right:0,padding:'5px',backgroundColor:"hsla(172, 96.40%, 43.50%, 0.53)"}} /></span>
                     </div>
                 );
-            case 'Pdf':
-                return (
-                    <div 
-                        className="explore-pdf-wrapper"
-                        style={{ position: 'relative', cursor: 'pointer' }}
-                    >
-                        <iframe 
-                            src={`${post.url}#toolbar=0&navpanes=0&scrollbar=0`} 
-                            title="PDF Viewer" 
-                            className='explore-pdf' 
-                        />
-                    </div>
-                    
-                );
-                case 'Audio':
+                case 'Pdf':
                     return (
-                        <div className="relative w-full max-w-md">
-                            {/* Background Image */}
-                            <img 
-                                src={disk} 
-                                alt="Audio thumbnail"
-                                className="w-full h-48 object-cover rounded-lg"
+                        <div 
+                            className="explore-pdf-wrapper"
+                            style={{ position: 'relative', cursor: 'pointer' }}
+                            onClick={() => navigate(`/p/${post._id}`, { state: { background: location } })}
+                        >
+                            {/* Overlay to capture click events */}
+                            <div 
+                                className="explore-pdf-overlay" 
+                                style={{ 
+                                    position: 'absolute', 
+                                    top: 0, 
+                                    left: 0, 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    zIndex: 1 
+                                }}
+                            ></div>
+                            <iframe 
+                                src={`${post.url}#toolbar=0&navpanes=0&scrollbar=0`} 
+                                title="PDF Viewer" 
+                                className='explore-pdf' 
+                                style={{ width: '100%', height: '100%', border: 'none' }}
                             />
-                            
-                            {/* Audio Player Overlay */}
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-lg">
-                                <audio 
-                                    controls
-                                    src={post.url}
-                                    className="w-[90%]"
-                                >
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </div>
                         </div>
                     );
+                
+                    case 'Audio':
+                        return (
+                            <div className="relative w-full max-w-md">
+                                   <div 
+                                    className="absolute top-2 right-2 text-white bg-black/50 p-1 rounded-full"
+                                    style={{
+                                         // Ensure it stays on top
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <FaMicrophone size={30} style={{zIndex:1000,position:'absolute',color:'white',top:0,right:0,padding:'5px',backgroundColor:"hsla(172, 96.40%, 43.50%, 0.53)"}}/>
+                                </div>
+                                {/* Background Image */}
+                                <img 
+                                    src={disk} 
+                                    alt="Audio thumbnail"
+                                    style={{ width: '100%', height: '100%',zIndex:3 }}
+                                />
+                    
+                                {/* Audio Icon */}
+                             
+                                
+                                {/* Audio Player Overlay */}
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-lg">
+                                    <audio 
+                                        controls
+                                        src={post.url}
+                                        className="w-[90%]"
+                                    >
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </div>
+                            </div>
+                        );
 
             default:
                 return <p className="text-red-500">Unsupported file type</p>;

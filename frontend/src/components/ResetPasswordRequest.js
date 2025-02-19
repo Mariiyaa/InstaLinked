@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import styled from 'styled-components';
+import logo from '../assets/logo.svg'
 const ResetPasswordRequest = () => {
   const [email, setEmail] = useState("");
   const [message,setMessage]=useState("")
@@ -18,7 +19,7 @@ const ResetPasswordRequest = () => {
 
   return (<>
     <Header>
-    <Logo>InstaLinked</Logo>
+    <Logo src={logo}></Logo>
   </Header>
     <StyledForm onSubmit={handleRequest}>
     <StyledHeading>Reset Password</StyledHeading>
@@ -43,7 +44,7 @@ const Header = styled.div`
   font-weight: bold;
 `;
 
-const Logo = styled.div`font-size: 20px;`;
+const Logo = styled.img`font-size: 20px;`;
 const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
@@ -51,8 +52,12 @@ const StyledForm = styled.form`
   padding: 20px;
   border: 1px solid #ccc; // Optional border
   border-radius: 5px;   // Optional rounded corners
-  width: 300px;        // Set a width for the form
-  margin: auto auto;       // Center the form on the page
+  width: 500px; 
+        // Set a width for the form
+  position:absolute;
+  bottom:50%;
+  margin-left:33%;
+   margin-right:30%;      // Center the form on the page
 `;
 
 const StyledHeading = styled.h2`
@@ -71,6 +76,7 @@ const StyledInput = styled.input`
 
 const StyledButton = styled.button`
   background: #006D77;
+   width: 100%;
   color: white;
   padding: 10px 15px;
   border: none;

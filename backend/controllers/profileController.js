@@ -39,8 +39,6 @@ const upload = multer({
       // Profile image handling
       const profileImagePath = req.file ? req.file.path.replace(/\\/g, "/") : null;
   
-      
-  
       // Find user by email
       const existingUser = await User.findOne({ email });
   
@@ -57,8 +55,16 @@ const upload = multer({
       if (gender) existingUser.gender = gender;
       if (location) existingUser.location = location;
       if (occupation) existingUser.occupation = occupation;
-      if (personas) existingUser.persona = personas;
-      if (contentPreferences) existingUser.contentPreferences = contentPreferences;
+  
+      // Convert personas to an array if it's a comma-separated string
+      if (personas) {
+        existingUser.persona = Array.isArray(personas) ? personas : personas.split(",").map(p => p.trim());
+      }
+  
+      if (contentPreferences) {
+        existingUser.contentPreferences = Array.isArray(contentPreferences) ? contentPreferences : contentPreferences.split(",").map(p => p.trim());
+      }
+  
       if (externalLinks) existingUser.externalLinks = JSON.parse(externalLinks);
   
       // Save the updated profile
@@ -73,7 +79,7 @@ const upload = multer({
       res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
   };
-
+  
 const displayProfile = async(req,res) => {
     const email="mariyaa.d6@gmail.com"
     const existingUser = await User.findOne({ email });

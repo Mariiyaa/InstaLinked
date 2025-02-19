@@ -81,14 +81,14 @@ const Login = () => {
             <Input
               type="text"
               name="email"
-              placeholder="Email or Phone"
+              placeholder="Enter Email "
               value={emailOrPhone}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
             <Input
               type="password"
-              placeholder="Password"
+              placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -188,13 +188,13 @@ const SignupLink = styled.p`
 `;
 
 const LoginLink = styled.p`
-  color: #004d4d;
+  color: #006D77;
 `;
 
 const SubmitButton = styled.button`
   padding: 12px;
   color: #fff;
-  background-color: #004d4d;
+  background-color: #006D77;
   border: none;
   border-radius: 5px;
   cursor: pointer;

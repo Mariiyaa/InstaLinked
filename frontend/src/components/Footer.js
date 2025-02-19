@@ -47,7 +47,7 @@ export default Footer;
 
 // Styled Components
 const FooterContainer = styled.footer`
-  background: #004d4d;
+  background: #006D77;
   color: white;
   padding: 40px 0;
   text-align: center;
