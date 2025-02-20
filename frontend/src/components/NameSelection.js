@@ -19,7 +19,7 @@ console.log(email)
       <Navbar>
         <Logo>InstaLinked</Logo>
         <Steps>Steps 1/3</Steps>
-        <SkipButton onClick={() => navigate("/persona-selection")}>Skip →</SkipButton>
+       
       </Navbar>
 
       {/* ✅ Main Content */}

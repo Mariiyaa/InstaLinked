@@ -188,7 +188,7 @@ const SignupLink = styled.p`
 `;
 
 const LoginLink = styled.p`
-  color: #006D77;
+  color:rgb(0, 109, 119);
 `;
 
 const SubmitButton = styled.button`
