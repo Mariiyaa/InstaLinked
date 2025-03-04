@@ -21,36 +21,24 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json());
-//const server = http.createServer(app);
+
 app.use(cors({
   credentials: true,
   origin: process.env.CLIENT_URL, // Allow requests from your frontend
   
 }));
+const server = http.createServer(app);
 
-// app.use((req, res, next) => {
-//   res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL);
-//   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//   res.setHeader("Access-Control-Allow-Credentials", "true");
-  
-//   if (req.method === "OPTIONS") {
-//     return res.status(200).end();
-//   }
-//   next();
-// });
-// app.use(express.json());
-
-// const io = new Server(server, {
-//   cors: {
-//        credentials: true
-//     origin: process.env.CLIENT_URL,
-//     methods: ["GET", "POST"],
-//     
-//   },
-//   transports: ["websocket", "polling"], // Ensure compatibility
-//   allowEIO3: true  // Allows older socket.io versions to connect
-// });
+ const io = new Server(server, {
+   cors: {
+        credentials: true,
+     origin: process.env.CLIENT_URL,
+     methods: ["GET", "POST"],
+     
+   },
+   transports: ["websocket", "polling"], // Ensure compatibility
+   allowEIO3: true  // Allows older socket.io versions to connect
+ });
 
 
 
@@ -69,7 +57,7 @@ app.use('/api/messages', messageRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    app.listen(process.env.PORT || 5000, () => console.log(`Server running on port ${process.env.PORT || 5000}`));
+    server.listen(process.env.PORT || 5000, () => console.log(`Server running on port ${process.env.PORT || 5000}`));
   })
   .catch((err) => console.error(err));
 
