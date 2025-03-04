@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
   otp:{type: String},
   resetToken: { type: String },
   resetTokenExpiration: { type: Date },
+  isOnline: { type: Boolean, default: false },
 });
 
 

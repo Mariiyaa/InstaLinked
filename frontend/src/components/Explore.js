@@ -11,8 +11,12 @@ const Explore = () => {
     const [filteredPosts, setFilteredPosts] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const videoRefs = useRef({});
+    const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
+    const selectedHashtag = location.state?.selectedHashtag || null;
+    console.log(selectedHashtag)
+
     useEffect(() => {
         const fetchPosts = async () => {
             try {
@@ -52,19 +56,47 @@ if (window.location.pathname === '/explore-page'&&performance.navigation.type ==
     }
 }, []);
 useEffect(() => {
-    if (selectedCategory) {
-        const filtered = posts.filter(post => post.category === selectedCategory);
-        const arrangedFilterPosts=arrangePosts(filtered)
-        setFilteredPosts(arrangedFilterPosts);
-    } else {
+    let filtered = [...posts];
+
+    // Apply hashtag filter if a hashtag is selected
+    if (selectedHashtag) {
+       
+    
+        filtered = filtered.filter(post => 
+            post.hashtags?.some(tag => {
+                const cleanedTag = tag.trim().replace("#", "").toLowerCase();
+                const cleanedSelected = selectedHashtag.trim().replace("#", "").toLowerCase();
+                const isMatch = cleanedTag === cleanedSelected;
+
+               
+                return isMatch;
+            })
+        );
+    }
+    else {
         setFilteredPosts(posts);
     }
-}, [selectedCategory, posts]);
-useEffect(() => {
-    console.log("Posts:", posts);
-    console.log("Filtered Posts:", filteredPosts);
-    console.log("Selected Category:", selectedCategory);
-}, [posts, filteredPosts, selectedCategory]);
+    if (searchTerm.trim() !== '') {
+        filtered = filtered.filter(post => 
+            post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            post.description.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+
+    // Apply category filter if a category is selected
+    if (selectedCategory) {
+  
+
+        filtered = filtered.filter(post => post.category === selectedCategory);
+    }
+
+
+
+    const arrangedFilterPosts = arrangePosts(filtered);
+    setFilteredPosts(arrangedFilterPosts);
+}, [selectedHashtag, selectedCategory, posts]);
+
+
 
 
 
@@ -268,7 +300,7 @@ useEffect(() => {
 
     return (
         <>
-            <AppNavbar />
+            <AppNavbar posts={posts} />
             <div>
                 <div className="filter-buttons">
                     {['Heritage', 'Music', 'Art', 'Story', 'Research'].map(category => (

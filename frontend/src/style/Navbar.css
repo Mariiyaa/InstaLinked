@@ -14,7 +14,7 @@ body {
   width: 100%;
   height:10vh;
   justify-content: space-between;
-  background-color: #006D77;
+  background-color: hsl(185, 100%, 23%);
   color: white;
   padding:0px 30px;
 }

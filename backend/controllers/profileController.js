@@ -86,14 +86,14 @@ const upload = multer({
   
   
   
-const displayProfile = async(req,res) => {
-    const email="mariyaa.d6@gmail.com"
-    const existingUser = await User.findOne({ email });
-    console.log(existingUser)
-    if(existingUser) {
-      res.json(existingUser)
-
-    }
+const getUser = async(req,res) => {
+  try {
+    const users = await User.find();
+    console.log(users) // Fetch all users
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
 
 }
 
@@ -101,5 +101,5 @@ const displayProfile = async(req,res) => {
 module.exports = {
   createProfile,
   upload,
-  displayProfile 
+  getUser
 };
