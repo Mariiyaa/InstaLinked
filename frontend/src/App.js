@@ -16,7 +16,7 @@ import PersonaSelection from "./components/PersonaSelection";
 import ContentSelection from "./components/ContentSelection";
 import NameSelection from "./components/NameSelection";
 import Navbar from "./components/Navbar";
-import Messages from './components/Messages'
+//import Messages from './components/Messages'
 import CreatePost from "./components/CreatePost";
 
 
@@ -67,7 +67,7 @@ const App = () => {
     <Route path="/your-name" element={<NameSelection />} />
     <Route path="/persona-selection" element={<PersonaSelection userEmail={user} />} />
     <Route path="/content-selection" element={<ContentSelection userEmail={user} />} />
-    <Route path="/messages" element={<Messages />} />
+    {/* <Route path="/messages" element={<Messages />} /> */}
     <Route path="/Home" element={<Home />} />
     <Route path="/reset-password-request" element={<ResetPasswordRequest />} />
     <Route path="/reset-password/:token" element={<ResetPassword />} />
