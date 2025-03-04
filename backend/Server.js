@@ -43,9 +43,10 @@ app.use(cors({
 
 // const io = new Server(server, {
 //   cors: {
+//        credentials: true
 //     origin: process.env.CLIENT_URL,
 //     methods: ["GET", "POST"],
-//     credentials: true
+//     
 //   },
 //   transports: ["websocket", "polling"], // Ensure compatibility
 //   allowEIO3: true  // Allows older socket.io versions to connect
