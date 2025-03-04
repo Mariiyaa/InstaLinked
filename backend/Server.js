@@ -17,8 +17,15 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: process.env.CLIENT_URL },
+  cors: {
+    origin: process.env.CLIENT_URL,
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ["websocket", "polling"], // Ensure compatibility
+  allowEIO3: true  // Allows older socket.io versions to connect
 });
+
 
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
@@ -28,9 +35,12 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 app.use(cors({
+  origin: process.env.CLIENT_URL, // Allow requests from your frontend
   credentials: true,
-  origin: process.env.CLIENT_URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
 
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);

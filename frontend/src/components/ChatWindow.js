@@ -2,7 +2,11 @@ import React, { useState,useEffect } from "react";
 import styled from "styled-components";
 import io from "socket.io-client";
 
-const socket = io(process.env.REACT_APP_BACK_PORT); 
+const socket = io(process.env.REACT_APP_BACK_PORT, {
+  transports: ["websocket", "polling"],
+  withCredentials: true
+});
+
 
 const ChatWindow = ({ selectedUser, messages, sendMessage,currentUser }) => {
   const [message, setMessage] = useState("");
