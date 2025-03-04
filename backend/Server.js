@@ -24,7 +24,7 @@ app.use(express.json());
 //const server = http.createServer(app);
 app.use(cors({
   credentials: true,
-  origin: process.env.CLIENT_URL // Allow requests from your frontend
+  origin: process.env.CLIENT_URL, // Allow requests from your frontend
   
 }));
 
@@ -50,6 +50,12 @@ app.use(cors({
 //   transports: ["websocket", "polling"], // Ensure compatibility
 //   allowEIO3: true  // Allows older socket.io versions to connect
 // });
+
+
+
+
+
+
 
 
 app.use('/api/auth', authRoutes);
