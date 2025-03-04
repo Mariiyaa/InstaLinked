@@ -15,10 +15,19 @@ const User =require('./models/User')
 require('dotenv').config();
 
 const app = express();
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp"); // Optional, based on use case
+  next();
+});
+app.use(express.json());
 //const server = http.createServer(app);
+
+
 app.use(cors({
-  origin: process.env.CLIENT_URL, // Allow requests from your frontend
   credentials: true,
+  origin: process.env.CLIENT_URL // Allow requests from your frontend
+  
 }));
 
 // app.use((req, res, next) => {
@@ -43,12 +52,6 @@ app.use(cors({
 //   transports: ["websocket", "polling"], // Ensure compatibility
 //   allowEIO3: true  // Allows older socket.io versions to connect
 // });
-
-
-
-
-
-
 
 
 app.use('/api/auth', authRoutes);
