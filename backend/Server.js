@@ -15,34 +15,34 @@ const User =require('./models/User')
 require('dotenv').config();
 
 const app = express();
-const server = http.createServer(app);
+//const server = http.createServer(app);
 app.use(cors({
   origin: process.env.CLIENT_URL, // Allow requests from your frontend
   credentials: true,
 }));
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL);
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+// app.use((req, res, next) => {
+//   res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL);
+//   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   res.setHeader("Access-Control-Allow-Credentials", "true");
   
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  next();
-});
-app.use(express.json());
+//   if (req.method === "OPTIONS") {
+//     return res.status(200).end();
+//   }
+//   next();
+// });
+// app.use(express.json());
 
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-    credentials: true
-  },
-  transports: ["websocket", "polling"], // Ensure compatibility
-  allowEIO3: true  // Allows older socket.io versions to connect
-});
+// const io = new Server(server, {
+//   cors: {
+//     origin: process.env.CLIENT_URL,
+//     methods: ["GET", "POST"],
+//     credentials: true
+//   },
+//   transports: ["websocket", "polling"], // Ensure compatibility
+//   allowEIO3: true  // Allows older socket.io versions to connect
+// });
 
 
 
@@ -61,7 +61,7 @@ app.use('/api/messages', messageRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    server.listen(process.env.PORT || 5000, () => console.log(`Server running on port ${process.env.PORT || 5000}`));
+    app.listen(process.env.PORT || 5000, () => console.log(`Server running on port ${process.env.PORT || 5000}`));
   })
   .catch((err) => console.error(err));
 
@@ -73,61 +73,61 @@ mongoose.connection.on('error', (err) => {
   console.error('❌ Mongoose connection error:', err);
 });
 
-const onlineUsers = new Map(); 
+// const onlineUsers = new Map(); 
 
-io.on("connection", (socket) => {
-  socket.on("sendMessage", async (data) => {
-    const { sender, receiver, message } = data;
-    const Message = require("./models/Message");
-    const newMessage = new Message({ sender, receiver, message });
-    console.log(newMessage)
-    await newMessage.save();
-    io.emit("receiveMessage", data);
-  });
-  socket.on("userOnline", async (email) => {
-    if (email) {
-      console.log(`✅ Marking user online: ${email}`);
+// io.on("connection", (socket) => {
+//   socket.on("sendMessage", async (data) => {
+//     const { sender, receiver, message } = data;
+//     const Message = require("./models/Message");
+//     const newMessage = new Message({ sender, receiver, message });
+//     console.log(newMessage)
+//     await newMessage.save();
+//     io.emit("receiveMessage", data);
+//   });
+//   socket.on("userOnline", async (email) => {
+//     if (email) {
+//       console.log(`✅ Marking user online: ${email}`);
       
-      onlineUsers.set(email, socket.id);
+//       onlineUsers.set(email, socket.id);
 
-      try {
-        await User.updateOne({ email }, { $set: { isOnline: true } });
+//       try {
+//         await User.updateOne({ email }, { $set: { isOnline: true } });
 
-        // Fetch all users' online statuses
-        const allUsers = await User.find({}, { email: 1, isOnline: 1 });
+//         // Fetch all users' online statuses
+//         const allUsers = await User.find({}, { email: 1, isOnline: 1 });
 
        
 
-        // Emit all users' online status
-        io.emit("updateUserStatus", allUsers);
-      } catch (err) {
-        console.error("❌ Error updating user status:", err);
-      }
-    }
-  });
+//         // Emit all users' online status
+//         io.emit("updateUserStatus", allUsers);
+//       } catch (err) {
+//         console.error("❌ Error updating user status:", err);
+//       }
+//     }
+//   });
 
-  // Handle user disconnecting
-  socket.on("disconnect", async () => {
-    let userEmail = [...onlineUsers.entries()].find(([_, id]) => id === socket.id)?.[0];
+//   // Handle user disconnecting
+//   socket.on("disconnect", async () => {
+//     let userEmail = [...onlineUsers.entries()].find(([_, id]) => id === socket.id)?.[0];
 
-    if (userEmail) {
-      console.log(`❌ Disconnected: ${userEmail}`);
+//     if (userEmail) {
+//       console.log(`❌ Disconnected: ${userEmail}`);
       
-      onlineUsers.delete(userEmail);
+//       onlineUsers.delete(userEmail);
 
-      try {
-        await User.updateOne({ email: userEmail }, { $set: { isOnline: false } });
+//       try {
+//         await User.updateOne({ email: userEmail }, { $set: { isOnline: false } });
 
-        // Fetch all users' online statuses
-        const allUsers = await User.find({}, { email: 1, isOnline: 1 });
+//         // Fetch all users' online statuses
+//         const allUsers = await User.find({}, { email: 1, isOnline: 1 });
 
-        console.log("📢 Emitting updated user status after disconnect:", allUsers);
+//         console.log("📢 Emitting updated user status after disconnect:", allUsers);
 
-        // Emit updated status to all clients
-        io.emit("updateUserStatus", allUsers);
-      } catch (err) {
-        console.error("❌ Error updating user status:", err);
-      }
-    }
-  });
-});
+//         // Emit updated status to all clients
+//         io.emit("updateUserStatus", allUsers);
+//       } catch (err) {
+//         console.error("❌ Error updating user status:", err);
+//       }
+//     }
+//   });
+// });
