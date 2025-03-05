@@ -3,7 +3,7 @@ import styled from "styled-components";
 import io from "socket.io-client";
 
 const socket = io(process.env.REACT_APP_BACK_PORT, {
-  transports: ["websocket", "polling"],
+  transports: ["polling"],
   withCredentials: true
 });
 

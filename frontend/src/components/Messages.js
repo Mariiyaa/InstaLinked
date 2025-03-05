@@ -6,7 +6,7 @@ import UserList from "./UserList";
 import ChatWindow from "./ChatWindow";
 
 const socket = io(process.env.REACT_APP_BACK_PORT, {
-  transports: ["websocket", "polling"],
+  transports: [ "polling"],
   withCredentials: true
 });
 

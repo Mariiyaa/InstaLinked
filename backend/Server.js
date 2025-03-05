@@ -9,13 +9,13 @@ const CreatePostRoute = require('./routes/CreatePostRoute');
 const ContentSelectRoutes = require('./routes/ContentSelect');
 const messageRoutes = require('./routes/messageRoutes');
 const { Server } = require("socket.io");
-const https = require("https");
+const http = require("http");
 const User =require('./models/User')
 
 require('dotenv').config();
 
 const app = express();
-const server = https.createServer(app);
+const server = http.createServer(app);
 
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
@@ -38,19 +38,19 @@ app.use(cors({
      methods: ["GET", "POST"],
      
    },
-   transports: ["websocket", "polling"], // Ensure compatibility
-   allowEIO3: true  // Allows older socket.io versions to connect
+   transports: ["polling"], // Ensure compatibility
+   // Allows older socket.io versions to connect
  });
 
 
 
- app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", process.env.CLIENT_URL);
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(200);
-});
+//  app.options("*", (req, res) => {
+//   res.header("Access-Control-Allow-Origin", process.env.CLIENT_URL);
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   res.header("Access-Control-Allow-Credentials", "true");
+//   res.sendStatus(200);
+// });
 
 
 
