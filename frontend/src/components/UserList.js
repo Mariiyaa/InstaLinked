@@ -39,7 +39,7 @@ const UserList = ({ users, setSelectedUser,messages,selectedUser,currentUser }) 
     if (users.length > 0) {
       fetchLatestMessages();
     }
-  }, [users, currentUser]);
+  }, [users, currentUser,messages]);
 
 const handleUserClick = (user) => {
     if (selectedUser?.email === user.email) return;
