@@ -1,45 +1,91 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import styled from "styled-components";
+import axios from "axios";
 
-const UserList = ({ users, setSelectedUser,messages }) => {
+const UserList = ({ users, setSelectedUser,messages,selectedUser,currentUser }) => {
   const [search, setSearch] = useState("");
- 
+  const [updatedUsers, setUpdatedUsers] = useState([]);
+  const [openedUsers, setOpenedUsers] = useState(new Set());
 
-  // Filter users based on search input
-  const filteredUsers = users.filter((user) =>
+  console.log(messages)
+
+  useEffect(() => {
+    const fetchLatestMessages = async () => {
+      try {
+        const response = await axios.get("/api/messages/latest-messages");
+        const latestMessages = response.data;
+
+        const messageMap = new Map();
+        latestMessages.forEach(({ _id, lastMessage, isRead, sender }) => {
+          const userKey = sender === currentUser.email ? _id.receiver : sender;
+          messageMap.set(userKey, { text: lastMessage, isRead, sender });
+        });
+
+        const usersWithMessages = users
+          .filter(user => user.email !== currentUser.email) // Exclude self
+          .map(user => ({
+            ...user,
+            lastMessage: messageMap.get(user.email)?.text || null,
+            isUnread: messageMap.get(user.email)?.isRead === false,
+            isSentByCurrentUser: messageMap.get(user.email)?.sender === currentUser.email, // Check if sender is current user
+          }));
+
+        setUpdatedUsers(usersWithMessages);
+      } catch (error) {
+        console.error("Error fetching latest messages:", error);
+      }
+    };
+
+    if (users.length > 0) {
+      fetchLatestMessages();
+    }
+  }, [users, currentUser]);
+
+const handleUserClick = (user) => {
+    if (selectedUser?.email === user.email) return;
+    setSelectedUser(user);
+};
+
+const filteredUsers = updatedUsers.filter(user =>
     user.fullName?.toLowerCase().includes(search.toLowerCase())
-  );
-  const getLastMessage = (user) => {
-    const userMessages = messages.filter(
-      (msg) => msg.sender === user.email || msg.receiver === user.email
-    );
-    return userMessages.length > 0
-      ? userMessages[userMessages.length - 1].message // Get the last message
-      : "No messages yet";
-  };
-
+);
+ 
   return (
     <Container>
       {/* Search Input */}
       <SearchBar
         type="text"
-        placeholder="Search messages"
+        placeholder="Search Account"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
 
       {/* User List */}
       <UserContainer>
-        {filteredUsers.map((user) => (
-          <UserItem key={user._id} onClick={() => setSelectedUser(user)}>
-            <Avatar src={user.profileImage}></Avatar>
-            <UserInfo>
-              <UserName>{user.fullName}</UserName>
-              <LastMessage>{getLastMessage(user)}</LastMessage>
-            </UserInfo>
-          </UserItem>
-        ))}
-      </UserContainer>
+  {filteredUsers.map((user) => {
+    // If searching, show all users; otherwise, hide users with null messages
+    if (search || user.lastMessage !==  null) {
+      return (
+        <UserItem key={user.email} onClick={() => handleUserClick(user)}>
+          <Avatar src={user.profileImage}></Avatar>
+          <UserInfo>
+            <UserName>{user.fullName}</UserName>
+            <LastMessage 
+                $isUnread={user.isUnread} 
+                $isSentByCurrentUser={user.isSentByCurrentUser}
+              >
+                {user.lastMessage}
+              </LastMessage>
+
+
+          </UserInfo>
+        </UserItem>
+      );
+    }
+    return null;
+  })}
+</UserContainer>
+
     </Container>
   );
 };
@@ -101,5 +147,10 @@ const UserName = styled.div`
 
 const LastMessage = styled.div`
   font-size: 12px;
-  color: gray;
+  color: ${({ $isUnread, $isSentByCurrentUser }) => 
+    $isSentByCurrentUser ? "grey" : $isUnread ? "red" : "black"};
+  font-weight: ${({ $isUnread, $isSentByCurrentUser }) => 
+    $isSentByCurrentUser ? "normal" : $isUnread ? "bold" : "normal"};
 `;
+
+

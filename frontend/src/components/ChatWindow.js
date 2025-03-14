@@ -1,9 +1,10 @@
 import React, { useState,useEffect } from "react";
 import styled from "styled-components";
 import io from "socket.io-client";
+import axios from 'axios'
 
 const socket = io(process.env.REACT_APP_BACK_PORT, {
-  transports: ["polling"],
+  transports: ["websocket", "polling"],
   withCredentials: true
 });
 
@@ -30,6 +31,7 @@ const ChatWindow = ({ selectedUser, messages, sendMessage,currentUser }) => {
         setIsOnline(user ? user.isOnline : false);
       }
     });
+    
 
     // Handle user going offline when the page is closed or refreshed
     const handleBeforeUnload = () => {
@@ -46,6 +48,16 @@ const ChatWindow = ({ selectedUser, messages, sendMessage,currentUser }) => {
       socket.off("updateUserStatus");
     };
   }, [selectedUser, currentUser]);
+
+  useEffect(() => {
+    if (!selectedUser || messages.length === 0) return;
+
+    // ✅ Log all messages for debugging
+    messages.forEach(msg => console.log(`Message: ${msg._id}, Content: ${msg.message}, isRead: ${msg.isRead}, Sender: ${msg.sender}`));
+
+  }, [messages, selectedUser]); // Runs when messages update
+
+
 
   if (!selectedUser || !selectedUser.email) {
     return <Placeholder>Select a user to start chatting</Placeholder>;

@@ -38,19 +38,13 @@ app.use(cors({
      methods: ["GET", "POST"],
      
    },
-   transports: ["polling"], // Ensure compatibility
-   // Allows older socket.io versions to connect
+   transports: ["websocket", "polling"], // Ensure compatibility
+   allowEIO3: true  // Allows older socket.io versions to connect
  });
 
 
 
-  app.options("*", (req, res) => {
-   res.header("Access-Control-Allow-Origin", process.env.CLIENT_URL);
-   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-   res.header("Access-Control-Allow-Credentials", "true");
-   res.sendStatus(200);
- });
+
 
 
 
@@ -82,12 +76,12 @@ mongoose.connection.on('error', (err) => {
 
  io.on("connection", (socket) => {
    socket.on("sendMessage", async (data) => {
-     const { sender, receiver, message } = data;
+     const { sender, receiver, message,isRead } = data;
      const Message = require("./models/Message");
-     const newMessage = new Message({ sender, receiver, message });
+     const newMessage = new Message({ sender, receiver, message,isRead: false });
      console.log(newMessage)
      await newMessage.save();
-     io.emit("receiveMessage", data);
+     io.emit("receiveMessage", {...data, _id: newMessage._id, isRead: false});
    });
    socket.on("userOnline", async (email) => {
      if (email) {

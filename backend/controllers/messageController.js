@@ -11,10 +11,31 @@ exports.getMessages = async (req, res) => {
             { sender, receiver }, // Messages sent by sender to receiver
             { sender: receiver, receiver: sender }, // Messages sent by receiver to sender
           ],
-        }).sort({ updatedAt: 1 });
-        console.log(messages) // Optional: Sort by time
-    
-        res.json(messages);
+        }).sort({ createdAt: 1 });
+       console.log(receiver)
+        const unreadMessageIds = messages
+        .filter(msg => msg.isRead === false) // ✅ Only mark messages from sender as read
+        .map(msg => msg);
+
+
+        console.log("XXXXXXXXXXXXXXXXXXX:",unreadMessageIds)
+    if (unreadMessageIds.length > 0) {
+        await Message.updateMany(
+            { _id: { $in: unreadMessageIds } },
+            { $set: { isRead: true } }
+        );
+
+    }
+const updatedMessages = await Message.find({
+    $or: [
+        { sender, receiver }, // Messages sent by sender to receiver
+        { sender: receiver, receiver: sender }, // Messages sent by receiver to sender
+    ],
+}).sort({ createdAt: 1 }); // Sort messages by time
+
+console.log("Updated Messages:", updatedMessages);
+
+res.json(updatedMessages)
       } catch (error) {
         console.error("Error fetching messages:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -23,9 +44,11 @@ exports.getMessages = async (req, res) => {
   
 exports.sendMessage = async (req, res) => {
   try {
-    const { sender, receiver, message } = req.body;
-    const newMessage = new Message({ sender, receiver, message });
+    const { sender, receiver, message,isRead } = req.body;
+    const newMessage = new Message({ sender, receiver, message, isRead: false });
+    console.log("messagess---------------------------------->",newMessage) 
     await newMessage.save();
+    
     res.status(201).json(newMessage);
   } catch (error) {
     res.status(500).json({ error: "Failed to send message" });

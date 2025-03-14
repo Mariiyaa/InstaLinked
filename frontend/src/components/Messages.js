@@ -6,12 +6,12 @@ import UserList from "./UserList";
 import ChatWindow from "./ChatWindow";
 
 const socket = io(process.env.REACT_APP_BACK_PORT, {
-  transports: [ "polling"],
+  transports: ["websocket", "polling"],
   withCredentials: true
 });
 
 
-const ChatApp = () => {
+const Messages = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -29,7 +29,7 @@ const ChatApp = () => {
   // ✅ Fetch users ONCE
   useEffect(() => {
     axios.get("api/profile/getUsers").then((res) => setUsers(res.data));
-  }, []);
+  }, [currentUser]);
 
   // ✅ Fetch messages when `selectedUser` or `currentUser` changes
   useEffect(() => {
@@ -39,6 +39,7 @@ const ChatApp = () => {
         .then((res) => setMessages(res.data));
     }
   }, [selectedUser, currentUser]);
+  
 
   // ✅ Listen for incoming messages and update state
   useEffect(() => {
@@ -47,7 +48,7 @@ const ChatApp = () => {
         (data.sender === currentUser?.email && data.receiver === selectedUser?.email) ||
         (data.sender === selectedUser?.email && data.receiver === currentUser?.email)
       ) {
-        setMessages((prev) => [...prev, data]); // ✅ Update messages instantly
+        setMessages((prev) => [...prev, data]);// ✅ Update messages instantly
       }
     };
 
@@ -62,7 +63,7 @@ const ChatApp = () => {
   const sendMessage = (message) => {
     if (!selectedUser?.email || !currentUser?.email) return;
 
-    const newMessage = { sender: currentUser.email, receiver: selectedUser.email, message };
+    const newMessage = { sender: currentUser.email, receiver: selectedUser.email, message,isRead:false };
 
     // ✅ Send message through Socket.io
     socket.emit("sendMessage", newMessage);
@@ -73,13 +74,13 @@ const ChatApp = () => {
 
   return (
     <Container>
-      <UserList users={users} setSelectedUser={setSelectedUser} messages={messages} />
+      <UserList selectedUser={selectedUser} users={users} setSelectedUser={setSelectedUser} messages={messages} currentUser={currentUser} />
       <ChatWindow selectedUser={selectedUser} messages={messages} sendMessage={sendMessage} currentUser={currentUser} />
     </Container>
   );
 };
 
-export default ChatApp;
+export default Messages;
 
 const Container = styled.div`
   display: flex;
