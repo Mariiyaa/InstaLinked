@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('../CloudinaryConfig')
+const Message = require("../models/Message");
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -85,17 +86,34 @@ const upload = multer({
   };
   
   
-  
-const getUser = async(req,res) => {
-  try {
-    const users = await User.find();
-    console.log(users) // Fetch all users
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch users" });
-  }
+  const getUser = async (req, res) => {
+    try {
+        const users = await User.find(); // Fetch all users
 
-}
+        // Fetch the latest message for each user
+        const usersWithLatestMessage = await Promise.all(users.map(async (user) => {
+            const latestMessage = await Message.findOne({
+                $or: [{ sender: user.email }, { receiver: user.email }]
+            })
+            .sort({ createdAt: -1 }) // Get the latest message
+            .select("message sender receiver createdAt isRead") // Include isRead field
+            .lean();
+
+            return {
+                ...user.toObject(), // Convert user document to plain object
+                latestMessage: latestMessage || null // Attach latest message (null if no messages)
+            };
+        }));
+
+        console.log(usersWithLatestMessage); // Debugging log
+        res.json(usersWithLatestMessage);
+    } catch (error) {
+        console.error("Error fetching users with messages:", error);
+        res.status(500).json({ error: "Failed to fetch users with messages" });
+    }
+};
+
+  
 
 
 module.exports = {

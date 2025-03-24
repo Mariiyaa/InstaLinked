@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
 import default_user from "../assets/default_user.jpg";
+import UserInteraction from "./UserInteraction"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { FaHeart, FaRegComment, FaPaperPlane, FaBookmark } from "react-icons/fa";
 import disk from "../assets/disk.jpg";
@@ -66,7 +67,7 @@ const PopUPexplore = () => {
     }
 
     return (
-        <ModalOverlay onClick={() => navigate(-1)}>
+        <ModalOverlay >
             <ModalContent onClick={(e) => e.stopPropagation()}>
                 <CloseButton onClick={() => navigate(-1)}>&times;</CloseButton>
                 <MediaContainer>
@@ -107,46 +108,7 @@ const PopUPexplore = () => {
                 <br />
               
             </Caption>
-            <StatsContainer >
-                <div style={{ display: "flex" }}>
-                    
-                    <StatItem style={{fontSize:'18px'}}>
-                    <button
-                      style={{border:'none',background:'none'}}>
-                        <FaHeart 
-                         onClick={() => setLiked(!liked)} 
-                         style={{border:'none',color: liked ? 'red' : 'gray', 
-                            transition: 'color 0.3s ease',fontSize:'20' }}
-                            />
-                    </button>1.2k
-                    </StatItem>
-                    
-                    <StatItem style={{fontSize:'18px'}}>
-                        <button  style={{border:'none',background:'none'}}><FaRegComment style={{fontSize:'20px'}}/></button>
-                         234
-                    </StatItem>
-                    <StatItem style={{fontSize:'18px'}}>
-                        <button  style={{border:'none',background:'none' }}><FaPaperPlane style={{fontSize:'20px'}}/></button>
-                         56
-                    </StatItem>
-                </div>
-                <FaBookmark style={{fontSize:'20px'}}/>
-            </StatsContainer>
-            <CommentList>
-                {comments.map((comment, index) => (
-                    <Comment key={index}>
-                        <UserImg src={default_user} alt="User" />
-                        <CommentText>
-                            <CommentUser>{comment.username}</CommentUser> {comment.text}
-                            <CommentTime>{comment.time}</CommentTime>
-                        </CommentText>
-                    </Comment>
-                ))}
-            </CommentList>
-            <CommentInputContainer>
-                <CommentInput placeholder="Add a comment..." />
-                <PostButton>Post</PostButton>
-            </CommentInputContainer>
+        <UserInteraction  setCurrentPost={setCurrentPost} currentpost={currentPost}/>
         </CommentSection>
                 <NavLeftButton onClick={() => handleNavigate("prev")}><FaArrowLeft size={30} style={{zIndex:1000,position:'absolute',color:'white',top:0,right:0,padding:'5px',backgroundColor:"hsla(171, 89.50%, 7.50%, 0.62)"}}></FaArrowLeft></NavLeftButton>
                 <NavRightButton onClick={() => handleNavigate("next")}><FaArrowRight size={30} style={{zIndex:1000,position:'absolute',color:'white',top:0,right:0,padding:'5px',backgroundColor:"hsla(171, 89.50%, 7.50%, 0.62)"}} /> </NavRightButton>

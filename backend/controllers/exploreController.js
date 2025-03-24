@@ -25,6 +25,9 @@ const explorePage = async (req, res) => {
           tags: "$posts.tags",
           visibility: "$posts.visibility",
           created_at: "$posts.created_at",
+          likes:"$posts.likes",
+          comments:"$posts.comments",
+          shares:"$posts.shares",
           // User details
           user: {
             fullName: "$userDetails.fullName",

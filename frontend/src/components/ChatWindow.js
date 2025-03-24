@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState,useEffect,useRef } from "react";
 import styled from "styled-components";
 import io from "socket.io-client";
 import axios from 'axios'
@@ -9,10 +9,43 @@ const socket = io(process.env.REACT_APP_BACK_PORT, {
 });
 
 
-const ChatWindow = ({ selectedUser, messages, sendMessage,currentUser }) => {
+const ChatWindow = ({ selectedUser, messages, setMessages,sendMessage,currentUser }) => {
   const [message, setMessage] = useState("");
   const [isOnline, setIsOnline] = useState(false)
+  const messagesEndRef = useRef(null);
 
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+  useEffect(() => {
+    if (selectedUser) {
+      // 🔥 Mark messages as read when chat is opened
+      socket.emit("markAsRead", {
+        sender: selectedUser.email,
+        receiver: currentUser.email
+      });
+    }
+  }, [selectedUser]);
+  
+  // ✅ Listen for real-time read updates
+  useEffect(() => {
+    socket.on("messagesRead", ({ sender, receiver }) => {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.sender === sender && msg.receiver === receiver
+            ? { ...msg, isRead: true }
+            : msg
+        )
+      );
+    });
+  
+    return () => socket.off("messagesRead");
+  }, []);
+
+  
   useEffect(() => {
     // Load current user from localStorage
 
@@ -31,6 +64,8 @@ const ChatWindow = ({ selectedUser, messages, sendMessage,currentUser }) => {
         setIsOnline(user ? user.isOnline : false);
       }
     });
+
+    
     
 
     // Handle user going offline when the page is closed or refreshed
@@ -114,7 +149,7 @@ const ChatWindow = ({ selectedUser, messages, sendMessage,currentUser }) => {
     </React.Fragment>
   );
 })}
-
+<div ref={messagesEndRef} />
           </Messages>
           <InputContainer>
             <Input

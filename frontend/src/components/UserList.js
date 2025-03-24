@@ -7,41 +7,63 @@ const UserList = ({ users, setSelectedUser,messages,selectedUser,currentUser }) 
   const [updatedUsers, setUpdatedUsers] = useState([]);
   const [openedUsers, setOpenedUsers] = useState(new Set());
 
-  console.log(messages)
+  console.log(users)
+  const fetchLatestMessages = async () => {
+    try {
+      const usersWithMessages = users
+      .filter(user => user.email !== currentUser.email) // Exclude self
+      .map(user => ({
+        ...user,
+        lastMessage: user.latestMessage?.message || null, // Extract latest message text
+        isUnread: user.latestMessage && user.latestMessage.sender !== currentUser.email && !user.latestMessage.isRead, // Unread if sent by others & not read
+        isSentByCurrentUser: user.latestMessage?.sender === currentUser.email, // Check if sender is current user
+      }));
 
+    setUpdatedUsers(usersWithMessages);
+    } catch (error) {
+      console.error("Error fetching latest messages:", error);
+    }
+  };
   useEffect(() => {
-    const fetchLatestMessages = async () => {
-      try {
-        const response = await axios.get("/api/messages/latest-messages");
-        const latestMessages = response.data;
 
-        const messageMap = new Map();
-        latestMessages.forEach(({ _id, lastMessage, isRead, sender }) => {
-          const userKey = sender === currentUser.email ? _id.receiver : sender;
-          messageMap.set(userKey, { text: lastMessage, isRead, sender });
-        });
-
-        const usersWithMessages = users
-          .filter(user => user.email !== currentUser.email) // Exclude self
-          .map(user => ({
-            ...user,
-            lastMessage: messageMap.get(user.email)?.text || null,
-            isUnread: messageMap.get(user.email)?.isRead === false,
-            isSentByCurrentUser: messageMap.get(user.email)?.sender === currentUser.email, // Check if sender is current user
-          }));
-
-        setUpdatedUsers(usersWithMessages);
-      } catch (error) {
-        console.error("Error fetching latest messages:", error);
-      }
-    };
 
     if (users.length > 0) {
       fetchLatestMessages();
     }
-  }, [users, currentUser,messages]);
+  }, [messages,selectedUser]);
 
-const handleUserClick = (user) => {
+  useEffect(() => {
+    if (!selectedUser) return;
+  
+    const unreadMessageIds = messages
+      .filter(msg => msg.sender === selectedUser.email && !msg.isRead)
+      .map(msg => msg._id);
+  
+    if (unreadMessageIds.length > 0) {
+      updateMessageReadStatus(unreadMessageIds);
+    }
+  }, [messages]); // ✅ Runs whenever `messages` update
+  
+
+
+  const updateMessageReadStatus = async (messageIds) => {
+    try {
+      await axios.put(`/api/messages/mark-read`, { messageIds });
+
+      // Update local state to remove unread indicators
+      setUpdatedUsers((prevUsers) =>
+        prevUsers.map((u) =>
+          messageIds.includes(u.latestMessage?._id)
+            ? { ...u, isUnread: false }
+            : u
+        )
+      );
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+    }
+  };
+
+const handleUserClick =async (user) => {
     if (selectedUser?.email === user.email) return;
     setSelectedUser(user);
 };
@@ -55,7 +77,7 @@ const filteredUsers = updatedUsers.filter(user =>
       {/* Search Input */}
       <SearchBar
         type="text"
-        placeholder="Search Account"
+        placeholder="Search messages"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
@@ -148,9 +170,9 @@ const UserName = styled.div`
 const LastMessage = styled.div`
   font-size: 12px;
   color: ${({ $isUnread, $isSentByCurrentUser }) => 
-    $isSentByCurrentUser ? "grey" : $isUnread ? "red" : "black"};
+    $isSentByCurrentUser ? "grey" : $isUnread ? "black" : "black"};
   font-weight: ${({ $isUnread, $isSentByCurrentUser }) => 
-    $isSentByCurrentUser ? "normal" : $isUnread ? "bold" : "normal"};
+    $isSentByCurrentUser ? "normal" : $isUnread ? "900" : "normal"};
 `;
 
 

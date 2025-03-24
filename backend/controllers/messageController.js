@@ -5,14 +5,20 @@ exports.getMessages = async (req, res) => {
     try {
         const { sender, receiver } = req.params;
     
-        // ✅ Fetch messages where sender and receiver match
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+        // ✅ Fetch messages within the past 3 months
         const messages = await Message.find({
-          $or: [
-            { sender, receiver }, // Messages sent by sender to receiver
-            { sender: receiver, receiver: sender }, // Messages sent by receiver to sender
-          ],
+            $or: [
+                { sender, receiver },
+                { sender: receiver, receiver: sender },
+            ],
+            
         }).sort({ createdAt: 1 });
-       console.log(receiver)
+
+        console.log(messages);
+        
         const unreadMessageIds = messages
         .filter(msg => msg.isRead === false) // ✅ Only mark messages from sender as read
         .map(msg => msg);
@@ -31,6 +37,7 @@ const updatedMessages = await Message.find({
         { sender, receiver }, // Messages sent by sender to receiver
         { sender: receiver, receiver: sender }, // Messages sent by receiver to sender
     ],
+    createdAt: { $gte: threeMonthsAgo }  
 }).sort({ createdAt: 1 }); // Sort messages by time
 
 console.log("Updated Messages:", updatedMessages);

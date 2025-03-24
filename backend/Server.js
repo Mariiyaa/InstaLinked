@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const exploreRoutes = require('./routes/exploreRoutes');
 const personaRoutes = require('./routes/persona');
+const PostRoutes = require('./routes/PostRoutes');
 const CreatePostRoute = require('./routes/CreatePostRoute');
 const ContentSelectRoutes = require('./routes/ContentSelect');
 const messageRoutes = require('./routes/messageRoutes');
@@ -57,6 +58,7 @@ app.use('/api', personaRoutes);
 app.use('/api', ContentSelectRoutes);
 app.use('/api', CreatePostRoute);
 app.use('/api/messages', messageRoutes);
+app.use('/api/posts',PostRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
@@ -78,11 +80,40 @@ mongoose.connection.on('error', (err) => {
    socket.on("sendMessage", async (data) => {
      const { sender, receiver, message,isRead } = data;
      const Message = require("./models/Message");
-     const newMessage = new Message({ sender, receiver, message,isRead: false });
+
+     const receiverSocketId = onlineUsers.get(receiver); // Assuming you store online users in a Map
+
+  const isReceiverActive = receiverSocketId && activeChats.get(receiver) === sender; // Check if receiver is chatting with sender
+
+
+     const newMessage = new Message({ sender, receiver, message,isRead: isReceiverActive });
      console.log(newMessage)
      await newMessage.save();
-     io.emit("receiveMessage", {...data, _id: newMessage._id, isRead: false});
+     io.emit("receiveMessage", {...data, _id: newMessage._id, isRead: isReceiverActive});
    });
+   
+   socket.on("markAsRead", async ({ sender, receiver }) => {
+    try {
+      const Message = require("./models/Message");
+  
+      // Update unread messages
+      await Message.updateMany(
+        { sender, receiver, isRead: false },
+        { $set: { isRead: true } }
+      );
+  
+      console.log(`✅ Messages from ${sender} to ${receiver} marked as read`);
+  
+      // Emit update to both users
+      io.to(onlineUsers.get(sender)).emit("messagesRead", { sender, receiver });
+      io.to(onlineUsers.get(receiver)).emit("messagesRead", { sender, receiver });
+  
+    } catch (error) {
+      console.error("❌ Error marking messages as read:", error);
+    }
+  });
+
+
    socket.on("userOnline", async (email) => {
      if (email) {
        console.log(`✅ Marking user online: ${email}`);

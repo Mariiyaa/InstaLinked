@@ -28,9 +28,15 @@ const Messages = () => {
 
   // ✅ Fetch users ONCE
   useEffect(() => {
-    axios.get("api/profile/getUsers").then((res) => setUsers(res.data));
-  }, [currentUser]);
-
+    const fetchUsers=async () => {
+      const response= await axios.get("api/profile/getUsers")
+    setUsers(response.data)
+   
+    }
+    fetchUsers()
+   
+  }, []);
+  console.log(users)
   // ✅ Fetch messages when `selectedUser` or `currentUser` changes
   useEffect(() => {
     if (selectedUser && currentUser?.email) {
@@ -74,8 +80,8 @@ const Messages = () => {
 
   return (
     <Container>
-      <UserList selectedUser={selectedUser} users={users} setSelectedUser={setSelectedUser} messages={messages} currentUser={currentUser} />
-      <ChatWindow selectedUser={selectedUser} messages={messages} sendMessage={sendMessage} currentUser={currentUser} />
+     {users.length > 0 ? <UserList selectedUser={selectedUser} users={users} setSelectedUser={setSelectedUser} messages={messages} currentUser={currentUser} /> : <p>Loading users...</p>}
+      <ChatWindow selectedUser={selectedUser} messages={messages} setMessages={setMessages} sendMessage={sendMessage} currentUser={currentUser} />
     </Container>
   );
 };

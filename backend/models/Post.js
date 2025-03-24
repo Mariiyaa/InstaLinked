@@ -42,6 +42,32 @@ const postSchema = new mongoose.Schema({
         type: Date, // Timestamp for when the post was created
         default: Date.now,
       },
+      likes: {
+        type: [
+          {
+            email: { type: String, required: true }, // User's email
+            name: { type: String, required: true }, // User's name
+          },
+        ],
+        default: [], // 🟢 Ensures likes is always an empty array by default
+      },
+
+      comments: {
+        type: [
+          {
+            email: { type: String, required: true }, // User's email
+            name: { type: String, required: true }, // User's name
+            text: { type: String, required: true }, // Comment text
+            createdAt: { type: Date, default: Date.now }, // Timestamp
+          },
+        ],
+        default: [], // 🟢 Ensures comments is always an empty array by default
+      },
+
+      shares: {
+        type: Number,
+        default: 0, // 🟢 Ensures shares starts at 0 by default
+      },
     },
   ],
 });
