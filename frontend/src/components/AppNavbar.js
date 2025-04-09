@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { FaHome, FaPlusCircle, FaBell, FaEnvelope, FaCog, FaWpexplorer } from "react-icons/fa";
 import default_user from '../assets/default_user.jpg';
 import logo from "../assets/logo.svg";
+import axios from "axios";
 import { Link,useNavigate } from 'react-router-dom';
 
 const Navbar = ({ userProfile, posts }) => {
@@ -25,7 +26,7 @@ const Navbar = ({ userProfile, posts }) => {
     }
   }, [location.pathname]);
 
-  const handleSearch = (event) => {
+  const handleSearch = async(event) => {
   const term = event.target.value;
   setSearchTerm(term);
 
@@ -45,8 +46,8 @@ const Navbar = ({ userProfile, posts }) => {
     navigate('/explore-page', { state: { selectedHashtag: null } });
       // Set to null if search bar is empty
   } 
-
-};
+  
+}
   const handleHashtagClick = (tag) => {
     navigate('/explore-page', { state: { selectedHashtag: tag } });
 };
@@ -99,7 +100,6 @@ const Navbar = ({ userProfile, posts }) => {
       <NavLinks isOpen={isOpen}>
         <NavLink onClick={() => navigate("/explore-page")}>Explore</NavLink>
         <NavLink onClick={() => navigate("/create-post")}>Create Post</NavLink>
-        <NavLink onClick={() => navigate("/create-profile")}>view  Profile</NavLink>
         <NavLink onClick={() => navigate("/messages")}>Messages</NavLink>
         <NavLink onClick={() => navigate("/settings")}>Settings</NavLink>
         

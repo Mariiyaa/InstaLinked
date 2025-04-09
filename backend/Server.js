@@ -8,12 +8,16 @@ const personaRoutes = require('./routes/persona');
 const PostRoutes = require('./routes/PostRoutes');
 const CreatePostRoute = require('./routes/CreatePostRoute');
 const ContentSelectRoutes = require('./routes/ContentSelect');
+const userRoutes = require('./routes/userRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const { Server } = require("socket.io");
 const http = require("http");
 const User =require('./models/User')
+const homesearchRoutes = require("./routes/homesearch")
 const Message = require("./models/Message");
-
+const feedRoutes = require("./routes/feed");
+const followRoutes = require('./routes/followRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -51,15 +55,19 @@ app.use(cors({
 
 
 
-
+ app.use("/api/homesearch", homesearchRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/explore', exploreRoutes);
 app.use('/api', personaRoutes);
 app.use('/api', ContentSelectRoutes);
 app.use('/api', CreatePostRoute);
+app.use("/api/users", userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/posts',PostRoutes);
+app.use("/api", feedRoutes);
+app.use('/api/follow', followRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {

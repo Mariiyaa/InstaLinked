@@ -429,6 +429,8 @@ const Container = styled.div`
   background: #f8f9fa;
   padding: 20px;
   border-radius: 10px;
+  display: flex;
+  gap: 20px;
   
   @media (max-width: 1024px) {
     width: 80%;
@@ -437,6 +439,7 @@ const Container = styled.div`
   @media (max-width: 768px) {
     width: 90%;
     padding: 15px;
+    flex-direction: column;
   }
   
   @media (max-width: 480px) {
@@ -451,6 +454,7 @@ const MainContent = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  flex: 1;
   
   @media (max-width: 768px) {
     gap: 15px;

@@ -14,7 +14,9 @@ const userSchema = new mongoose.Schema({
   persona: { type: [String], enum: ['Heritage Lover', 'Explorer', 'Researcher', 'Practitioner', 'Conservator', 'Artist',''], default: null },    
   contentPreferences: { type: [String], default: [] },
   externalLinks: { type: [String] },
-  password: { type: String}, // Password should always be required.
+  password: { type: String},
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Password should always be required.
   otp:{type: String},
   resetToken: { type: String },
   resetTokenExpiration: { type: Date },

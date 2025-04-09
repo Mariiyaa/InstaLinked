@@ -18,8 +18,10 @@ import NameSelection from "./components/NameSelection";
 import Navbar from "./components/Navbar";
 import Messages from './components/Messages'
 import CreatePost from "./components/CreatePost";
-
-
+import HomeNavbar from './components/HomeNavbar';
+import ViewProfile from "./components/ViewProfile";
+import { SocketProvider } from './context/SocketContext';
+import Notification from './components/Notification';
 
 axios.defaults.baseURL = process.env.REACT_APP_BACK_PORT
 axios.defaults.withCredentials = true
@@ -39,42 +41,42 @@ const App = () => {
   }, []);
 
   return (
-    <>
+    <SocketProvider>
+      {/* Show Navbar only for Signup and Login */}
+      <Routes>
+        <Route path="/"element={
+            <>
+              <Navbar />
+              <Signup />
+            </>
+          }
+        />
+        <Route path="/login" element={
+            <>
+              <Navbar />
+              <Login />
+            </>
+          }
+        />
+      </Routes>
 
-  {/* Show Navbar only for Signup and Login */}
-  <Routes>
-    <Route path="/"element={
-        <>
-          <Navbar />
-          <Signup />
-        </>
-      }
-    />
-    <Route path="/login" element={
-        <>
-          <Navbar />
-          <Login />
-        </>
-      }
-    />
-  </Routes>
+      {/* Other Routes without Navbar */}
+      <Routes>
+        <Route path="/verify-otp" element={<OtpVerification />} />
+        <Route path="/create-profile" element={<CreateProfile />} />
+        <Route path="/create-post" element={<CreatePost />} />
+        <Route path="/your-name" element={<NameSelection />} />
+        <Route path="/persona-selection" element={<PersonaSelection userEmail={user} />} />
+        <Route path="/content-selection" element={<ContentSelection userEmail={user} />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/Home" element={<HomeNavbar />} />
+        <Route path="/profile/:userId" element={<ViewProfile />} />
+        <Route path="/reset-password-request" element={<ResetPasswordRequest />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/my-profile" element={<DisplayProfile />} />
+      </Routes>
 
-  {/* Other Routes without Navbar */}
-  <Routes>
-    <Route path="/verify-otp" element={<OtpVerification />} />
-    <Route path="/create-profile" element={<CreateProfile />} />
-    <Route path="/create-post" element={<CreatePost />} />
-    <Route path="/your-name" element={<NameSelection />} />
-    <Route path="/persona-selection" element={<PersonaSelection userEmail={user} />} />
-    <Route path="/content-selection" element={<ContentSelection userEmail={user} />} />
-    <Route path="/messages" element={<Messages />} />
-    <Route path="/Home" element={<Home />} />
-    <Route path="/reset-password-request" element={<ResetPasswordRequest />} />
-    <Route path="/reset-password/:token" element={<ResetPassword />} />
-    <Route path="/my-profile" element={<DisplayProfile />} />
-    </Routes>
-
-   <Routes location={background || location}>
+      <Routes location={background || location}>
         <Route path="/explore-page" element={<Explore />} />
       </Routes>
 
@@ -89,17 +91,17 @@ const App = () => {
           />
         </Routes>
       )}
-
-
-  </>
+    </SocketProvider>
   );
 };
 
 
 const Root = () => (
+  <SocketProvider>
   <Router>
-    <App />
+    <App/>
   </Router>
+</SocketProvider>
 );
 
 export default Root;
