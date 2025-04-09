@@ -22,12 +22,21 @@ const Messages = () => {
   const hasRun = useRef(false);
   const [showUserList, setShowUserList] = useState(true);
 
-  // ✅ Fetch logged-in user ONCE
+  // ✅ Fetch logged-in user ONCE and set online status
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
     if (user) {
       setCurrentUser(user);
+      // Set user as online when they enter the messages page
+      socket.emit("userOnline", user.email);
     }
+    
+    // Clean up function to set user as offline when they leave
+    return () => {
+      if (user) {
+        socket.emit("userOffline", user.email);
+      }
+    };
   }, []);
 
   // Handle shared post from location state
