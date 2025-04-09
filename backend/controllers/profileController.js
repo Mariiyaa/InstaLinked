@@ -104,8 +104,7 @@ const upload = multer({
                 latestMessage: latestMessage || null // Attach latest message (null if no messages)
             };
         }));
-
-        console.log(usersWithLatestMessage); // Debugging log
+ // Debugging log
         res.json(usersWithLatestMessage);
     } catch (error) {
         console.error("Error fetching users with messages:", error);

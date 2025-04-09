@@ -8,13 +8,13 @@ const Footer = () => {
       <TopSection>
         <Logo src={logo} alt="Logo" />
         <NavLinks>
-          <NavItem href="#">Pricing</NavItem>
+         
           <NavItem href="#">About us</NavItem>
           <NavItem href="#">Features</NavItem>
           <NavItem href="#">Help Center</NavItem>
           <NavItem href="#">Contact us</NavItem>
           <NavItem href="#">FAQs</NavItem>
-          <NavItem href="#">Careers</NavItem>
+         
         </NavLinks>
       </TopSection>
 
@@ -29,8 +29,8 @@ const Footer = () => {
           </select>
         </LanguageSelector>
         <CopyrightText>
-          © 2022 Brand, Inc. • <a href="#">Privacy</a> • <a href="#">Terms</a> •{" "}
-          <a href="#">Sitemap</a>
+          © 2025 Brand, Inc. • <a href="#">Privacy</a> • <a href="#">Terms</a> •{" "}
+          
         </CopyrightText>
         <SocialIcons>
           <Icon href="#"><i className="fab fa-twitter"></i></Icon>
@@ -47,7 +47,7 @@ export default Footer;
 
 // Styled Components
 const FooterContainer = styled.footer`
-  background: #006D77;
+  background: #006d77;
   color: white;
   padding: 40px 0;
   text-align: center;

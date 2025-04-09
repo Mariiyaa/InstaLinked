@@ -12,6 +12,7 @@ const messageRoutes = require('./routes/messageRoutes');
 const { Server } = require("socket.io");
 const http = require("http");
 const User =require('./models/User')
+const Message = require("./models/Message");
 
 require('dotenv').config();
 
@@ -74,51 +75,111 @@ mongoose.connection.on('error', (err) => {
   console.error('❌ Mongoose connection error:', err);
 });
 
- const onlineUsers = new Map(); 
+ const onlineUsers = new Map();
+ 
+ 
 
  io.on("connection", (socket) => {
    socket.on("sendMessage", async (data) => {
-     const { sender, receiver, message,isRead } = data;
+
+     const { sender, receiver, message,isRead,sharedPost } = data;
+     console.log("📩 Sending message:", data);
      const Message = require("./models/Message");
-
-     const receiverSocketId = onlineUsers.get(receiver); // Assuming you store online users in a Map
-
-  const isReceiverActive = receiverSocketId && activeChats.get(receiver) === sender; // Check if receiver is chatting with sender
-
-
-     const newMessage = new Message({ sender, receiver, message,isRead: isReceiverActive });
-     console.log(newMessage)
+     const newMessage = new Message({ sender, receiver, message,isRead: false,sharedPost });
+     
      await newMessage.save();
-     io.emit("receiveMessage", {...data, _id: newMessage._id, isRead: isReceiverActive});
+    
+
+     io.emit("receiveMessage", {...data, _id: newMessage._id, isRead: false,sharedPost});
+
+     const latestMessages = await getLatestMessages();
+     io.emit("updateLatestMessages", latestMessages);
    });
-   
-   socket.on("markAsRead", async ({ sender, receiver }) => {
+
+   socket.on("new-message", (data) => {
+    io.emit("new-message", data);
+  });
+  
+  socket.on("mark-as-read", async ({ sender, receiver }) => {
     try {
-      const Message = require("./models/Message");
+      console.log("🟢 Incoming 'mark-as-read' request");
+        console.log("📌 Current Socket ID:", socket.id);
+        console.log("📌 Online Users Map:", onlineUsers);
+
+        // 🔹 Retrieve user email correctly
+        let userEmail = onlineUsers.get(socket.id);
+        if (!userEmail) {
+          // Try to get email from the receiver parameter
+          userEmail = receiver;
+          console.log("⚠️ Socket ID not found, attempting to re-register user:", userEmail);
+          
+          await ensureUserOnline(socket, userEmail);
+          userEmail = onlineUsers.get(socket.id); // Get the email again after registration
+        }
+    
+        if (!userEmail) {
+          console.log("❌ User email is still undefined after registration attempt");
+         
+        }
+
+        // ✅ Ensure only the receiver marks messages as read
+        if (userEmail !== receiver) {
+            console.log("❌ Only the receiver can mark messages as read.");
+            return;
+        }
+
+        console.log(`📩 Marking messages as read from ${sender} to ${receiver}`);
+
+        // ✅ Update unread messages from sender to receiver
+        await Message.updateMany(
+            { sender, receiver, isRead: false },
+            { $set: { isRead: true } }
+        );
+
+        // 🔹 Fetch updated messages (only IDs & read status)
+        const updatedMessages = await Message.find(
+            { sender, receiver },
+            { _id: 1, isRead: 1 }
+        );
+
+        console.log("✅ Updated Messages:", updatedMessages);
+
+        // ✅ Notify sender about read messages
+        const senderSocketId = onlineUsers.get(sender);
+        if (senderSocketId) {
+            io.to(senderSocketId).emit("message-read", { sender, receiver, updatedMessages });
+        }
+
+        // ✅ Update latest messages
+        const latestMessages = await getLatestMessages();
+       
+        io.emit("updateLatestMessages", latestMessages);
+
+    } catch (err) {
+        console.error("❌ Error marking messages as read:", err);
+    }
+});
+
   
-      // Update unread messages
-      await Message.updateMany(
-        { sender, receiver, isRead: false },
-        { $set: { isRead: true } }
-      );
-  
-      console.log(`✅ Messages from ${sender} to ${receiver} marked as read`);
-  
-      // Emit update to both users
-      io.to(onlineUsers.get(sender)).emit("messagesRead", { sender, receiver });
-      io.to(onlineUsers.get(receiver)).emit("messagesRead", { sender, receiver });
-  
+  socket.on("fetchLatestMessages", async () => {
+    try {
+      const latestMessages = await getLatestMessages();
+      socket.emit("updateLatestMessages", latestMessages);
     } catch (error) {
-      console.error("❌ Error marking messages as read:", error);
+      console.error("❌ Error fetching latest messages:", error);
     }
   });
-
-
    socket.on("userOnline", async (email) => {
      if (email) {
-       console.log(`✅ Marking user online: ${email}`);
-      
-       onlineUsers.set(email, socket.id);
+      for (const [key, value] of onlineUsers.entries()) {
+        if (value === email || key === email) {
+            onlineUsers.delete(key);
+        }
+    }
+
+    // 🔹 Store the new socket ID
+    onlineUsers.set(email, socket.id);
+    onlineUsers.set(socket.id, email);
 
        try {
          await User.updateOne({ email }, { $set: { isOnline: true } });
@@ -135,6 +196,11 @@ mongoose.connection.on('error', (err) => {
        }
      }
    });
+
+
+
+
+
 
    // Handle user disconnecting
    socket.on("disconnect", async () => {
@@ -161,3 +227,49 @@ mongoose.connection.on('error', (err) => {
      }
    });
  });
+
+
+ const getLatestMessages = async () => {
+  const users = await User.find();
+  return Promise.all(
+    users.map(async (user) => {
+      // Get the latest message where the user is either the sender or receiver
+      const lastMsg = await Message.findOne({
+        $or: [{ sender: user.email }, { receiver: user.email }],
+      })
+        .sort({ createdAt: -1 })
+        .select("message sender receiver isRead createdAt");
+
+      if (!lastMsg) return { email: user.email, lastMessage: null, isUnread: null };
+
+      const isUnread = !lastMsg.isRead; // ✅ True for both sender & receiver if not read
+
+      return {
+        email: user.email,
+        lastMessage: lastMsg.message,
+        isUnread, // ✅ True if the message is unread (for both sender & receiver)
+      };
+    })
+  );
+};
+
+const ensureUserOnline = async (socket, email) => {
+  if (!onlineUsers.has(email) || !onlineUsers.has(socket.id)) {
+    // Cleanup any existing entries
+    for (const [key, value] of onlineUsers.entries()) {
+      if (value === email || key === email) {
+        onlineUsers.delete(key);
+      }
+    }
+
+    // Add new entries
+    onlineUsers.set(email, socket.id);
+    onlineUsers.set(socket.id, email);
+
+    await User.updateOne({ email }, { $set: { isOnline: true } });
+    const allUsers = await User.find({}, { email: 1, isOnline: 1 });
+    io.emit("updateUserStatus", allUsers);
+  }
+};
+
+

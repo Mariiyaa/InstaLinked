@@ -5,7 +5,7 @@ import styled from "styled-components";
 const NameSelection = () => {
   const [name, setName] = useState("");
   const location = useLocation();
-  const email = location.state?.email || localStorage.getItem("userEmail");
+  const email = location.state?.email || sessionStorage.getItem("userEmail");
 
   const navigate = useNavigate();
 console.log(email)

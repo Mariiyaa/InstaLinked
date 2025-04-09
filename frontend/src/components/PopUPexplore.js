@@ -130,6 +130,10 @@ const ModalOverlay = styled.div`
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    
+    @media (max-width: 768px) {
+        align-items: center;
+    }
 `;
 
 const ModalContent = styled.div`
@@ -138,9 +142,19 @@ const ModalContent = styled.div`
     flex-direction: row;
     width: 50%;
     height: 60%;
-    
     overflow: hidden;
     position: relative;
+    
+    @media (max-width: 768px) {
+        flex-direction: column;
+        width: 90%;
+        height: 80%;
+    }
+    
+    @media (max-width: 480px) {
+        width: 95%;
+        height: 70%;
+    }
 `;
 
 const CloseButton = styled.button`
@@ -151,6 +165,7 @@ const CloseButton = styled.button`
     background: none;
     border: none;
     cursor: pointer;
+    z-index: 10;
 `;
 
 const UserDetails = styled.div`
@@ -177,6 +192,10 @@ const MediaContainer = styled.div`
     background-color: #fff;
     position: relative;
     padding:0px;
+    
+    @media (max-width: 768px) {
+        max-height: 50%;
+    }
 `;
 
 const MediaImage = styled.img`
@@ -215,9 +234,12 @@ const CommentSection = styled.div`
     background-color: #fff;
     border-radius: 8px;
     border: 1px solid #ddd;
+    
+    @media (max-width: 768px) {
+        width: 100%;
+        max-height: 50%;
+    }
 `;
-
-
 
 const Caption = styled.p`
     padding:10px;
@@ -305,7 +327,6 @@ const PostButton = styled.button`
     font-size: 14px;
     cursor: pointer;
 `;
-
 
 const NavButton = styled.button`
     position: absolute;

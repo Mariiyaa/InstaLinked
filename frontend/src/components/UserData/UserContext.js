@@ -9,17 +9,17 @@ export const useUser = () => useContext(UserContext);
 // Context Provider Component
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    // Get user from localStorage on initial load
-    const storedUser = localStorage.setItem("user");
+    // Get user from sessionStorage on initial load
+    const storedUser = sessionStorage.setItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
-  // Sync user data to localStorage when it changes
+  // Sync user data to sessionStorage when it changes
   useEffect(() => {
     if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
+      sessionStorage.setItem("user", JSON.stringify(user));
     } else {
-      localStorage.removeItem("user");
+      sessionStorage.removeItem("user");
     }
   }, [user]);
 
@@ -27,7 +27,7 @@ export const UserProvider = ({ children }) => {
   const updateUser = (updatedData) => {
     setUser((prevUser) => {
       const newUser = { ...prevUser, ...updatedData };
-      localStorage.setItem("user", JSON.stringify(newUser)); // Update localStorage
+      sessionStorage.setItem("user", JSON.stringify(newUser)); // Update sessionStorage
       return newUser;
     });
   };
@@ -35,7 +35,7 @@ export const UserProvider = ({ children }) => {
   // Logout function to clear user data
   const logoutUser = () => {
     setUser(null);
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
   };
 
   return (

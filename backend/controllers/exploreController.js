@@ -31,6 +31,7 @@ const explorePage = async (req, res) => {
           // User details
           user: {
             fullName: "$userDetails.fullName",
+            email: "$userDetails.email",
             profileImage: "$userDetails.profileImage",
             bio: "$userDetails.bio",
             location: "$userDetails.location",

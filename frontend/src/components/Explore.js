@@ -23,7 +23,7 @@ const Explore = () => {
                 const response = await axios.get('/api/explore/explore-page');
                 if (Array.isArray(response.data)) {
                     const arranged = arrangePosts(response.data);
-                    localStorage.setItem('storedPosts', JSON.stringify(arranged));  // Store arranged posts
+                    sessionStorage.setItem('storedPosts', JSON.stringify(arranged));  // Store arranged posts
                     setPosts(arranged);
                     setFilteredPosts(arranged);
                 } else {
@@ -36,15 +36,15 @@ const Explore = () => {
 
 if (window.location.pathname === '/explore-page'&&performance.navigation.type === performance.navigation.TYPE_RELOAD) {
         // If page was refreshed, clear local storage and fetch new posts
-        localStorage.removeItem('storedPosts');
+        sessionStorage.removeItem('storedPosts');
         fetchPosts();
     } else {
-        // Check if posts are passed via state or available in localStorage
+        // Check if posts are passed via state or available in sessionStorage
         if (location.state?.posts) {
             setPosts(location.state.posts);
             setFilteredPosts(location.state.posts);
         } else {
-            const storedPosts = localStorage.getItem('storedPosts');
+            const storedPosts = sessionStorage.getItem('storedPosts');
             if (storedPosts) {
                 const parsedPosts = JSON.parse(storedPosts);
                 setPosts(parsedPosts);

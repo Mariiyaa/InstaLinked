@@ -1,72 +1,30 @@
-import React, { useState,useEffect,useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import io from "socket.io-client";
-import axios from 'axios'
+import socket from "../socket";
+import { FaPaperPlane } from "react-icons/fa";
 
-const socket = io(process.env.REACT_APP_BACK_PORT, {
-  transports: ["websocket", "polling"],
-  withCredentials: true
-});
-
-
-const ChatWindow = ({ selectedUser, messages, setMessages,sendMessage,currentUser }) => {
-  const [message, setMessage] = useState("");
-  const [isOnline, setIsOnline] = useState(false)
+const ChatWindow = ({ selectedUser, messages, sendMessage, currentUser }) => {
+  const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
-
+  const [isOnline, setIsOnline] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
-  useEffect(() => {
-    if (selectedUser) {
-      // 🔥 Mark messages as read when chat is opened
-      socket.emit("markAsRead", {
-        sender: selectedUser.email,
-        receiver: currentUser.email
-      });
-    }
-  }, [selectedUser]);
-  
-  // ✅ Listen for real-time read updates
-  useEffect(() => {
-    socket.on("messagesRead", ({ sender, receiver }) => {
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg.sender === sender && msg.receiver === receiver
-            ? { ...msg, isRead: true }
-            : msg
-        )
-      );
-    });
-  
-    return () => socket.off("messagesRead");
-  }, []);
-
-  
-  useEffect(() => {
-    // Load current user from localStorage
-
     if (currentUser) {
-
+      socket.connect();
       socket.emit("userOnline", currentUser.email);
     }
 
     // Listen for updated user statuses
-    socket.on("updateUserStatus", (updatedUsers) => {
-
-
-      // Update selected user's status
+    const handleUserStatus = (updatedUsers) => {
       if (selectedUser) {
         const user = updatedUsers.find((u) => u.email === selectedUser.email);
         setIsOnline(user ? user.isOnline : false);
       }
-    });
+    };
 
-    
-    
+    socket.on("updateUserStatus", handleUserStatus);
 
     // Handle user going offline when the page is closed or refreshed
     const handleBeforeUnload = () => {
@@ -78,113 +36,148 @@ const ChatWindow = ({ selectedUser, messages, setMessages,sendMessage,currentUse
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      socket.emit("userOffline", currentUser?.email);
+      if (currentUser) {
+        socket.emit("userOffline", currentUser.email);
+      }
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      socket.off("updateUserStatus");
+      socket.off("updateUserStatus", handleUserStatus);
+      socket.disconnect();
     };
   }, [selectedUser, currentUser]);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    if (!selectedUser || messages.length === 0) return;
+    scrollToBottom();
+  }, [messages]);
 
-    // ✅ Log all messages for debugging
-    messages.forEach(msg => console.log(`Message: ${msg._id}, Content: ${msg.message}, isRead: ${msg.isRead}, Sender: ${msg.sender}`));
-
-  }, [messages, selectedUser]); // Runs when messages update
-
-
-
-  if (!selectedUser || !selectedUser.email) {
-    return <Placeholder>Select a user to start chatting</Placeholder>;
-  }
-
-
-  const handleSend = () => {
-    if (message.trim()) {
-      sendMessage(message);
-  console.log(message)
-      setMessage("");
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (newMessage.trim()) {
+      sendMessage(newMessage);
+      setNewMessage("");
     }
   };
 
+  const renderMessage = (message, index) => {
+    if (!message) {
+      console.error("Received undefined message");
+      return null;
+    }
+
+    console.log("Message:", message);
+    const date = message.createdAt ? new Date(message.createdAt) : new Date();
+    const isValidDate = !isNaN(date.getTime());
+    const timeString = isValidDate ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : null;
+    const dateString = isValidDate ? date.toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" }) : null;
+    const previousDate = index > 0 && messages[index - 1]?.createdAt ? new Date(messages[index - 1].createdAt).toDateString() : null;
+    const currentDate = date.toDateString();
+    const isOwnMessage = message.sender === currentUser?.email;
+  
+    return (
+      <React.Fragment key={message._id || index}>
+        {/* Show date separator */}
+        {index === 0 || currentDate !== previousDate ? (
+          <DateSeparator>{dateString}</DateSeparator>
+        ) : null}
+  
+        {message.sharedPost ? (
+          // If it's a shared post, display formatted post details
+          <SharedPostMessage isOwnMessage={isOwnMessage}>
+            <strong>{message.sharedPost.author?.name || 'Unknown'} shared a post:</strong>
+            <SharedPostCard>
+              {message.sharedPost.content_type === 'Image' && (
+                <SharedPostImage src={message.sharedPost.image} alt="Shared Post" onClick={() => navigate(`/p/${message.sharedPost._id}`)} />
+              )}
+              {message.sharedPost.content_type === 'Pdf' && (
+                <SharedPostPdf>
+                  <PdfIcon>📄</PdfIcon>
+                  <PdfText>PDF Document</PdfText>
+                </SharedPostPdf>
+              )}
+              {(message.sharedPost.content_type === 'Reel' || message.sharedPost.content_type === 'Documentary') && (
+                <SharedPostVideo>
+                  <VideoIcon>🎥</VideoIcon>
+                  <VideoText>{message.sharedPost.content_type === 'Reel' ? 'Reel' : 'Documentary'}</VideoText>
+                </SharedPostVideo>
+              )}
+              <SharedPostDetails>
+                <SharedPostCaption>{message.sharedPost.caption || "no caption"}</SharedPostCaption>
+              </SharedPostDetails>
+            </SharedPostCard>
+          </SharedPostMessage>
+        ) : (
+          // Normal message
+          <Message isOwnMessage={isOwnMessage}>{message.message || ''}</Message>
+        )}
+  
+        <Timestamp isOwnMessage={isOwnMessage}>{timeString}</Timestamp>
+      </React.Fragment>
+    );
+  };
+  
+
   return (
-    <ChatContainer>
-     {selectedUser && selectedUser.email ?(
+    <Container>
+      {selectedUser ? (
         <>
-          <Header>
-          <Avatar src={selectedUser.profileImage}/>
+      <Header>
+          <UserAvatar src={selectedUser.profileImage}/>
           <UserName>{selectedUser.email}
           <Status isOnline={isOnline}>{isOnline ? "Online" : "Offline"}</Status>
           </UserName>
           </Header>
-          <Messages>
-          {messages.map((msg, index) => {
-  const date = new Date(msg.createdAt);
-  const isValidDate = !isNaN(date.getTime()); // Check if date is valid
-
-  const timeString = isValidDate
-    ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : null;
-
-  const dateString = isValidDate
-    ? date.toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" })
-    : null;
-
-  const isSender = msg.sender !== selectedUser.email;
-  const previousDate = index > 0 ? new Date(messages[index - 1].createdAt).toDateString() : null;
-  const currentDate = date.toDateString();
-
-  return (
-    <React.Fragment key={index}>
-      {/* Show date separator if the current message is from a different day */}
-      {index === 0 || currentDate !== previousDate ? (
-        <DateSeparator>{dateString}</DateSeparator>
-      ) : null}
-
-      <Message isSender={isSender}>
-        {msg.message}
-        
-      </Message>
-      <Timestamp isSender={isSender}>{timeString}</Timestamp>
-    </React.Fragment>
-  );
-})}
-<div ref={messagesEndRef} />
-          </Messages>
-          <InputContainer>
+          <MessagesContainer>
+            {messages.map((msg, index) => renderMessage(msg, index))}
+            <div ref={messagesEndRef} />
+          </MessagesContainer>
+          <InputContainer onSubmit={handleSubmit}>
             <Input
-              type="text"
-              placeholder="Type Here..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type a message..."
             />
-            <SendButton onClick={handleSend}>Send</SendButton>
+            <SendButton type="submit">
+              <FaPaperPlane />
+            </SendButton>
           </InputContainer>
         </>
       ) : (
-        <Placeholder>Select a user to start chatting</Placeholder>
+        <NoChatSelected>
+          Select a user to start chatting
+        </NoChatSelected>
       )}
-    </ChatContainer>
+    </Container>
   );
 };
 
 export default ChatWindow;
 
-const ChatContainer = styled.div`
+const Container = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #E5E7EB;
+  background-color: #f5f5f5;
+  
+  @media (max-width: 768px) {
+    height: 100%;
+  }
 `;
 
 const Header = styled.div`
   background: #FAFAFA;
   padding: 10px;
-  display:flex;
-  align-items:center;
+  display: flex;
+  align-items: center;
   font-weight: bold;
+  
+  @media (max-width: 768px) {
+    padding: 8px;
+  }
 `;
-const Avatar = styled.img`
+const UserAvatar = styled.img`
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -195,6 +188,11 @@ const Avatar = styled.img`
   align-items: center;
   justify-content: center;
   margin-right: 10px;
+  
+  @media (max-width: 480px) {
+    width: 32px;
+    height: 32px;
+  }
 `;
 
 const Status = styled.div`
@@ -206,69 +204,251 @@ const UserName = styled.div`
   font-weight: bold;
 `;
 
-const Messages = styled.div`
+const MessagesContainer = styled.div`
   flex: 1;
-  padding: 10px;
-    display: flex;
-  flex-direction: column;
+  padding: 20px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px;
+  }
 `;
 
 const Message = styled.div`
-  background: ${(props) => (props.isSender ? "#006D77" : "#FAFAFA")};
-  color: ${(props) => (props.isSender ? "white" : "black")};
-  padding: 10px;
-  border-radius: 10px;
-  max-width: 60%;
-  display:flex;
-  flex-direction:column;
-  align-self: ${(props) => (props.isSender ? "flex-end" : "flex-start")};
-  margin: 5px;
-`;
-const Timestamp = styled.div`
-  font-size: 12px;
-  color:#737373;
-  text-align: ${(props) => (props.isSender ? "right" : "left")};
-  margin-top: 0px;
-  margin-bottom: 8px;
-`;
-const DateSeparator = styled.div`
-  text-align: center;
-  color: #999;
-  font-size: 14px;
-  font-weight: bold;
-  margin: 10px 0;
-  position: relative;
-
- 
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  background-color: ${props => props.isOwnMessage ? "#006d77" : "white"};
+  color: ${props => props.isOwnMessage ? "white" : "#333"};
+  align-self: ${props => props.isOwnMessage ? "flex-end" : "flex-start"};
+  word-wrap: break-word;
+  
+  @media (max-width: 768px) {
+    max-width: 80%;
+  }
+  
+  @media (max-width: 480px) {
+    max-width: 85%;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
 `;
 
-
-const InputContainer = styled.div`
+const SharedPostMessage = styled(Message)`
+  max-width: 80%;
   display: flex;
-  padding: 10px;
+  flex-direction: column;
+  
+  @media (max-width: 768px) {
+    max-width: 85%;
+  }
+  
+  @media (max-width: 480px) {
+    max-width: 90%;
+  }
+`;
+
+const SharedPostContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const SharedPostText = styled.div`
+  margin-bottom: 5px;
+`;
+
+const SharedPostCard = styled.div`
   background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-top: 5px;
+  
+  @media (max-width: 480px) {
+    border-radius: 8px;
+  }
+`;
+
+const SharedPostImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  
+  @media (max-width: 768px) {
+    height: 180px;
+  }
+  
+  @media (max-width: 480px) {
+    height: 150px;
+  }
+`;
+
+const SharedPostDetails = styled.div`
+  padding: 10px;
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+  }
+`;
+
+const SharedPostAuthor = styled.div`
+  font-weight: 500;
+  margin-bottom: 5px;
+  color:black
+`;
+
+const SharedPostCaption = styled.div`
+  color: #666;
+  font-size: 0.9em;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8em;
+  }
+`;
+
+const InputContainer = styled.form`
+  padding: 15px;
+  background-color: white;
+  border-top: 1px solid #ddd;
+  display: flex;
+  gap: 10px;
 `;
 
 const Input = styled.input`
   flex: 1;
   padding: 10px;
-  border: none;
-  border-radius: 5px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+
+  &:focus {
+    border-color: #006d77;
+  }
 `;
 
 const SendButton = styled.button`
-  background: #006D77;
+  background-color: #006d77;
   color: white;
   border: none;
-  padding: 10px;
-  margin-left: 5px;
-  border-radius: 5px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #1557b0;
+  }
 `;
 
-const Placeholder = styled.div`
+const NoChatSelected = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 1.2em;
+`;
+
+const DateSeparator = styled.div`
   text-align: center;
+  color: #888;
+  font-size: 0.8em;
+  
+  @media (max-width: 480px) {
+    font-size: 0.7em;
+    margin: 8px 0;
+  }
+`;
+
+const Timestamp = styled.div`
+  font-size: 0.7em;
+  color: #888;
+  margin-top: 2px;
+  align-self: ${props => props.isOwnMessage ? "flex-end" : "flex-start"};
+  
+  @media (max-width: 480px) {
+    font-size: 0.6em;
+  }
+`;
+
+const SharedPostPdf = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 20px;
-  color: gray;
+  background: #f5f5f5;
+  cursor: pointer;
+  &:hover {
+    background: #e5e5e5;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 15px;
+  }
+`;
+
+const PdfIcon = styled.div`
+  font-size: 48px;
+  margin-bottom: 10px;
+  
+  @media (max-width: 480px) {
+    font-size: 36px;
+  }
+`;
+
+const PdfText = styled.div`
+  font-size: 16px;
+  color: #333;
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
+`;
+
+const SharedPostVideo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #f5f5f5;
+  cursor: pointer;
+  &:hover {
+    background: #e5e5e5;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 15px;
+  }
+`;
+
+const VideoIcon = styled.div`
+  font-size: 48px;
+  margin-bottom: 10px;
+  
+  @media (max-width: 480px) {
+    font-size: 36px;
+  }
+`;
+
+const VideoText = styled.div`
+  font-size: 16px;
+  color: #333;
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
 `;

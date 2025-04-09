@@ -8,7 +8,7 @@ import axios from 'axios';
 const ContentSelection = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const userEmail = location.state?.email || localStorage.getItem('userEmail');
+  const userEmail = location.state?.email || sessionStorage.getItem('userEmail');
 
   const [selectedContent, setSelectedContent] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');

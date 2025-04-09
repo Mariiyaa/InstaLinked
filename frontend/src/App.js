@@ -31,7 +31,7 @@ const App = () => {
   const background = location.state?.background;
 
   useEffect(() => {
-    const storedEmail = localStorage.getItem("userEmail");
+    const storedEmail = sessionStorage.getItem("userEmail");
     if (storedEmail) {
       setUser(storedEmail); 
       console.log(process.env) // ✅ Use setUser correctly

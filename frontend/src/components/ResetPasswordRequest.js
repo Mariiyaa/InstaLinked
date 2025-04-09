@@ -10,6 +10,7 @@ const ResetPasswordRequest = () => {
     e.preventDefault();
     setMessage("")
     try {
+      console.log("Sending reset password request for email:", email);
       await axios.post("api/auth/reset-password-request", { email });
       setMessage("Reset link send to your email")
     } catch (error) {
@@ -18,20 +19,26 @@ const ResetPasswordRequest = () => {
   };
 
   return (<>
+  <Pagewrapper>
     <Header>
     <Logo src={logo}></Logo>
   </Header>
-    <StyledForm onSubmit={handleRequest}>
+    <StyledForm >
     <StyledHeading>Reset Password</StyledHeading>
     <StyledInput type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-    <StyledButton type="submit">Send Reset Email</StyledButton>
+    <StyledButton onClick={handleRequest} type="submit">Send Reset Email</StyledButton>
     <StyledMessage>{message}</StyledMessage>
   </StyledForm>
+  </Pagewrapper>
   </>
   );
 };
 
 export default ResetPasswordRequest;
+const Pagewrapper= styled.div`  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f4f2ee;`
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
@@ -45,20 +52,18 @@ const Header = styled.div`
 `;
 
 const Logo = styled.img`font-size: 20px;`;
-const StyledForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  align-items: center;  
-  padding: 20px;
-  border: 1px solid #ccc; // Optional border
-  border-radius: 5px;   // Optional rounded corners
-  width: 500px; 
-        // Set a width for the form
-  position:absolute;
-  bottom:50%;
-  margin-left:33%;
-   margin-right:30%;      // Center the form on the page
+const StyledForm = styled.div`
+  width: 500px;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 10px;
+  align-self: center;
+  justify-self: center;
+  text-align: center;
+  margin-top: 15%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 `;
+
 
 const StyledHeading = styled.h2`
   margin-bottom: 15px;

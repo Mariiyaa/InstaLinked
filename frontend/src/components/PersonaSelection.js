@@ -9,7 +9,7 @@ const PersonaSelection = () => {
   const [selectedPersonas, setSelectedPersonas] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const location = useLocation();
-  const userEmail = location.state?.email || localStorage.getItem('userEmail');
+  const userEmail = location.state?.email || sessionStorage.getItem('userEmail');
   const Name = location.state?.name;
 
   const personas = [

@@ -46,7 +46,7 @@ router.post("/posts", upload.single("file"), async (req, res) => {
   try {
     const { email, caption, tags, hashtags, visibility, type, category } = req.body;
 
-    // 🚨 Fix: Await User Lookup
+    // 🚨 Fix: Await User1 Lookup
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: "User not found" });

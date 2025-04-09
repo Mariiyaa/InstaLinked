@@ -33,7 +33,7 @@ const CreatePost = () => {
   const [visibility, setVisibility] = useState("Public");
   const [error, setError] = useState("");
 
-  const user = localStorage.getItem("user");
+  const user = sessionStorage.getItem("user");
   const userObject = JSON.parse(user);
   console.log("User Email:", userObject.email);
 
@@ -59,6 +59,7 @@ const CreatePost = () => {
     }
 
     try {
+      console.log("formdata : ",formData)
       const response = await axios.post("/api/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -194,21 +195,43 @@ const CreatePost = () => {
 export default CreatePost;
 const Container = styled.div`
   width: 75%;
-  height:90vh;
+  height: 90vh;
   margin: 20px auto;
   background: #f8f9fa;
   padding: 20px;
   border-radius: 10px;
+  
+  @media (max-width: 1024px) {
+    width: 90%;
+  }
+  
+  @media (max-width: 768px) {
+    width: 95%;
+    height: auto;
+    min-height: 90vh;
+    padding: 15px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 100%;
+    margin: 10px auto;
+    padding: 10px;
+  }
 `;
 
 const Header = styled.h2`
   text-align: center;
-  display:flex;
-  justify-content:space-between;
+  display: flex;
+  justify-content: space-between;
   background: #116466;
   color: white;
   padding: 10px;
   border-radius: 5px;
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+    font-size: 18px;
+  }
 `;
 const CloseButton = styled.button`
   background: none;
@@ -222,15 +245,30 @@ const Content = styled.div`
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 20px;
+  }
 `;
 
 const LeftSection = styled.div`
   width: 45%;
   background: white;
-  position:relative;
+  position: relative;
   padding: 20px;
-  height:90%;
+  height: 90%;
   border-radius: 10px;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 15px;
+  }
 `;
 
 const RightSection = styled.div`
@@ -238,6 +276,14 @@ const RightSection = styled.div`
   background: white;
   padding: 20px;
   border-radius: 10px;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 15px;
+  }
 `;
 
 const Title = styled.h3`
@@ -248,40 +294,55 @@ const ButtonGroup = styled.div`
   display: flex;
   justify-content: space-evenly;
   margin-bottom: 15px;
-  gap:2%
+  gap: 2%;
   
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
 `;
 
 const ContentTypeButton = styled.button`
-flex:1;
+  flex: 1;
   padding: 8px 15px;
   background: ${(props) => (props.active ? "#116466" : "#ddd")};
   color: ${(props) => (props.active ? "white" : "black")};
   border: none;
-
   border-radius: 5px;
   cursor: pointer;
+  
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
 `;
 
 const Dropzone = styled.div`
-  
   padding: 20px;
-  background-color:#dddddd;
+  background-color: #dddddd;
   text-align: center;
-  justify-content:center;
+  justify-content: center;
   cursor: pointer;
-  position:relative;
-  height:100%;
-  height:25vh;
+  position: relative;
+  height: 25vh;
   border-radius: 5px;
   margin-bottom: 15px;
+  
+  @media (max-width: 768px) {
+    height: 20vh;
+  }
+  
+  @media (max-width: 480px) {
+    height: 15vh;
+    padding: 10px;
+  }
 `;
 
 const PreviewImage = styled.img`
-  
-
   object-fit: cover;
   border-radius: 5px;
+  max-height: 100%;
+  max-width: 100%;
 `;
 
 const TextArea = styled.textarea`
@@ -291,6 +352,11 @@ const TextArea = styled.textarea`
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  
+  @media (max-width: 480px) {
+    height: 8vh;
+    padding: 8px;
+  }
 `;
 
 const Input = styled.input`
@@ -299,6 +365,10 @@ const Input = styled.input`
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+  }
 `;
 
 const VisibilityWrapper = styled.div`
@@ -317,11 +387,20 @@ const Button = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+    font-size: 14px;
+  }
 `;
 
 const RecentPost = styled.div`
   display: flex;
   margin-bottom: 10px;
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
 `;
 
 const PostIcon = styled.div`
@@ -333,6 +412,10 @@ const PreviewCard = styled.div`
   padding: 10px;
   border-radius: 5px;
   text-align: center;
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+  }
 `;
 
 const UserInfo = styled.div`

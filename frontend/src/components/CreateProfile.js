@@ -5,7 +5,7 @@ import { FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
 import AppNavbar from "./AppNavbar";
 
 const ProfileEdit = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(sessionStorage.getItem("user"));
   const [message, setMessage] = useState("");
 
   console.log("ProfileEdit received userData:", user);
@@ -24,10 +24,10 @@ const ProfileEdit = () => {
     externalLinks: [""],
   });
 
-  const saveUserToLocalStorage = (userData) => {
+  const saveUserTosessionStorage = (userData) => {
     if (userData) {
-      localStorage.clear(); // Clear previous data to allow multiple users
-      localStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.clear(); // Clear previous data to allow multiple users
+      sessionStorage.setItem("user", JSON.stringify(userData));
     } else {
       console.error("userData is undefined or null");
     }
@@ -79,8 +79,8 @@ const ProfileEdit = () => {
       const response = await axios.post("/api/profile/create-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      saveUserToLocalStorage(userProfile)
-      saveUserToLocalStorage(response.data.user)
+      saveUserTosessionStorage(userProfile)
+      saveUserTosessionStorage(response.data.user)
       setMessage(response.data.message);
 
     } catch (error) {
@@ -424,21 +424,57 @@ export default ProfileEdit;
 // Styled Components
 
 const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  padding: 3%;
-  background-color: #f4f3ee;
+  width: 60%;
+  margin: 20px auto;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  
+  @media (max-width: 1024px) {
+    width: 80%;
+  }
+  
+  @media (max-width: 768px) {
+    width: 90%;
+    padding: 15px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 95%;
+    margin: 10px auto;
+    padding: 10px;
+  }
 `;
 
 const MainContent = styled.div`
-  width: 60%;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  
+  @media (max-width: 768px) {
+    gap: 15px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 10px;
+  }
 `;
 
 const FormContainer = styled.div`
+  width: 100%;
+  background: white;
   padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px;
+  }
 `;
 
 const Title = styled.h2`
@@ -450,18 +486,30 @@ const ProfilePhoto = styled.div`
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 20px;
+  
+  @media (max-width: 768px) {
+    width: 120px;
+    height: 120px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 100px;
+    height: 100px;
+  }
 `;
 
 const Label = styled.label`
-  background: #ececec;
-  border-radius: 50%;
-  height: 150px;
-  width: 150px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
 `;
 
 const ProfileImage = styled.img`
@@ -483,38 +531,77 @@ const Row = styled.div`
 `;
 
 const Input = styled.input`
-  flex: 1;
+  width: 100%;
   padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+    font-size: 14px;
+  }
 `;
 
 const Textarea = styled.textarea`
   width: 100%;
   padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  min-height: 100px;
+  font-size: 16px;
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+    min-height: 80px;
+    font-size: 14px;
+  }
 `;
 
 const Select = styled.select`
   width: 100%;
   padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+    font-size: 14px;
+  }
 `;
 
 const ButtonRow = styled.div`
   display: flex;
-  justify-content:center;
-  gap: 30px;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 10px;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 5px;
+  }
 `;
 
 const Button = styled.button`
-  padding: 10px;
-  background:#006D77 ;
-  border-radius:5px;
-  font-size:16px;
-  color: white;
+  padding: 10px 20px;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
+  font-size: 16px;
+  background: ${props => props.primary ? '#116466' : props.secondary ? '#6c757d' : '#dc3545'};
+  color: white;
+  
+  @media (max-width: 480px) {
+    width: 100%;
+    padding: 8px 15px;
+    font-size: 14px;
+  }
 `;
 
 const SaveButton = styled(Button)`
-width:30%;`;
+background-color: #006D77;
+`;
 
 const CancelButton = styled(Button)`
   background: #e0e0e0;
@@ -538,11 +625,15 @@ const Message = styled.p`
 `;
 
 export const Sidebar = styled.div`
- width: 30%;
+  width: 30%;
   margin-left: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 export const Updates = styled.div`

@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import styled from "styled-components";
 import { auth } from "../firebaseConfig"; 
+import bookshelves from "../assets/bookshelves-amico.png"
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import Footer from "./Footer";
 
@@ -16,11 +17,11 @@ const Login = () => {
   const isValidEmail = (input) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
   const isValidPhoneNumber = (input) => /^\d{9}$/.test(input);
 
-  // Function to Store User in LocalStorage
-  const saveUserToLocalStorage = (userData) => {
+  // Function to Store User in sessionStorage
+  const saveUserTosessionStorage = (userData) => {
     if (userData) {
-      localStorage.clear(); // Clear previous data to allow multiple users
-      localStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.clear(); // Clear previous data to allow multiple users
+      sessionStorage.setItem("user", JSON.stringify(userData));
     } else {
       console.error("userData is undefined or null");
     }
@@ -39,7 +40,7 @@ const Login = () => {
       const response = await axios.post("/api/auth/login", { emailOrPhone, password });
       console.log("Token:", response.data);
 
-      saveUserToLocalStorage(response.data.user); // Store user in localStorage
+      saveUserTosessionStorage(response.data.user); // Store user in sessionStorage
 
       navigate("/Home");
     } catch (error) {
@@ -59,8 +60,8 @@ const Login = () => {
       console.log("Google Login ID Token:", idToken);
       const response = await axios.post("/api/auth/login-google", { firebaseToken: idToken });
       
-      saveUserToLocalStorage(response.data.user); // Store user in localStorage
-      const user = JSON.parse(localStorage.getItem("user"));
+      saveUserTosessionStorage(response.data.user); // Store user in sessionStorage
+      const user = JSON.parse(sessionStorage.getItem("user"));
       console.log(user)
       navigate("/Home", { state: response.data.name });
     } catch (error) {
@@ -72,7 +73,7 @@ const Login = () => {
   return (
     <PageWrapper>
       <Main>
-        <Placeholder />
+        <Placeholder src={bookshelves}/>
         <FormWrapper>
           {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
           <Title>Login</Title>
@@ -105,15 +106,15 @@ const Login = () => {
                 <GoogleLogo src="googleicon.png" alt="Google Logo" />
                 Login with Google
               </GoogleButton>
-              <FacebookButton>
+              {/* <FacebookButton>
                 <GoogleLogo src="facebookicon.png" alt="Google Logo" />
                 Login with Facebook
-                </FacebookButton>
+                </FacebookButton> */}
             </OAuthButtons>
           </Form>
-          <SignupLink>
-            Don't have an account? <Link to="/"><LoginLink>Sign up</LoginLink></Link>
-          </SignupLink>
+          <LoginLink>
+  Don't have an account? <span onClick={() => navigate('/')}>Sign up</span>
+</LoginLink>
         </FormWrapper>
       </Main>
       <Footer />
@@ -127,8 +128,8 @@ export default Login;
 const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background: #f8f9fa;
+  min-height: 100vh;
+  background: #f4f2ee;
 `;
 
 const Main = styled.main`
@@ -138,33 +139,35 @@ const Main = styled.main`
   flex-grow: 1;
   padding: 50px;
 `;
-
-const Placeholder = styled.div`
+const Placeholder = styled.img`
   width: 500px;
-  height: 300px;
-  background: #e0e0e0;
+  height: 400px;
+  
   border-radius: 10px;
 `;
 
 const FormWrapper = styled.div`
   width: 500px;
-  padding: 60px;
-  background: #fff;
+  padding: 30px;
+  background: #ffffff;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 `;
 
+
 const Title = styled.h2`
+  margin-bottom: 25px;
   text-align: center;
   font-size: 24px;
-  margin-bottom: 10px;
-  color: #333;
+  color: #000000;
+  font-weight: bold;
 `;
 
 const Subtitle = styled.p`
   text-align: center;
   margin-bottom: 10px;
-  color: #666;
+  color: #000000;
+  font-weight: bold;
 `;
 
 const Form = styled.form`
@@ -178,8 +181,14 @@ const Input = styled.input`
   margin-bottom: 10px;
   width: 100%;
   padding: 12px;
+  border: 1px solid #ccc;
   font-size: 16px;
   border-radius: 5px;
+ transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #006d77;
+  }
 `;
 
 const SignupLink = styled.p`
@@ -187,17 +196,35 @@ const SignupLink = styled.p`
   justify-content: center;
 `;
 
-const LoginLink = styled.p`
-  color:rgb(0, 109, 119);
-`;
+const LoginLink = styled.div`
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+  color: #555;
 
+  span {
+    color: #006d77;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
 const SubmitButton = styled.button`
   padding: 12px;
+  font-size: 16px;
   color: #fff;
-  background-color: #006D77;
+  background-color: #006d77;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #004d55;
+  }
 `;
 
 const OAuthButtons = styled.div`
@@ -241,6 +268,9 @@ const GoogleLogo = styled.img`
 const ErrorMessage = styled.div`
   color: red;
 `;
+
+
+
 
 const Separator = styled.div`
   display: flex;

@@ -7,8 +7,12 @@ const ResetPassword = () => {
   const { token } = useParams();
   const [newPassword, setNewPassword] = useState("");
   const [conPassword, setConPassword] = useState("");
+    const [message,setMessage]=useState("")
   const navigate=useNavigate();
+
   const handleReset = async (e) => {
+    setMessage("")
+    console.log("handle reset called")
     if(!newPassword.match(conPassword)){
       alert("password different ")
       return;
@@ -25,22 +29,28 @@ const ResetPassword = () => {
   };
 
   return (<>
+  <Pagewrapper>
    <Header>
     <Logo src={logo}></Logo>
   </Header>
-    <StyledForm onSubmit={handleReset}>
+    <StyledForm >
       <StyledHeading>Set New Password</StyledHeading>
       <StyledInput type="password" placeholder="Password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
       <StyledHeading>Confirm Password</StyledHeading>
       <StyledInput type="password" placeholder="Password" value={conPassword} onChange={(e) => setConPassword(e.target.value)} required />
-      <StyledButton type="submit">Reset Password</StyledButton>
+      <StyledButton onClick={handleReset} type="submit">Reset Password</StyledButton>
     </StyledForm>
+    </Pagewrapper>
   </>
  
   );
 };
 
 export default ResetPassword;
+const Pagewrapper= styled.div`  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f4f2ee;`
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
@@ -54,18 +64,18 @@ const Header = styled.div`
 `;
 
 const Logo = styled.img`font-size: 20px;`;
-const StyledForm = styled.form`
-  display: flex;
-  flex-direction: column;
-  align-items: center;  
-  padding: 20px;
-  border: 1px solid #ccc; // Optional border
-  border-radius: 5px;   // Optional rounded corners
-  width: 300px;        // Set a width for the form
-  position:absolute;
-  bottom:50%;
-  left:40%;       // Center the form on the page
+const StyledForm = styled.div`
+  width: 500px;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 10px;
+  align-self: center;
+  justify-self: center;
+  text-align: center;
+  margin-top: 15%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 `;
+
 
 const StyledHeading = styled.h2`
   margin-bottom: 15px;

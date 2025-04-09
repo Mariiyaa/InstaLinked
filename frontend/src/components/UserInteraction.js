@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
-import { FaHeart, FaRegComment, FaPaperPlane, FaBookmark } from "react-icons/fa";
+import { FaHeart, FaRegComment, FaPaperPlane, FaBookmark, FaShare } from "react-icons/fa";
+import SharePostPopup from './SharePostPopup';
 
 const CommentSection = ({ currentpost, setCurrentPost }) => {
   const [liked, setLiked] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [showSharePopup, setShowSharePopup] = useState(false);
 
-  const currentuser = JSON.parse(localStorage.getItem("user"));
+  const currentuser = JSON.parse(sessionStorage.getItem("user"));
 
   console.log(currentuser.email,currentuser.fullname)
   const user = { email: currentuser.email, name: currentuser.fullname };
@@ -48,13 +50,8 @@ const CommentSection = ({ currentpost, setCurrentPost }) => {
     }
   };
 
-  const handleShare = async () => {
-    try {
-      const res = await axios.post(`/api/posts/${currentpost._id}/share`);
-      setCurrentPost(prev => ({ ...prev, shares: res.data.shares }));
-    } catch (error) {
-      console.error("Error sharing post:", error);
-    }
+  const handleShare = () => {
+    setShowSharePopup(true);
   };
 
   if (!currentpost) return <p>Loading...</p>;
@@ -85,10 +82,9 @@ const CommentSection = ({ currentpost, setCurrentPost }) => {
             <button style={{ border: "none", background: "none" }} onClick={handleShare}>
               <FaPaperPlane />
             </button>
-            {currentpost.shares}
+           
           </StatItem>
         </div>
-        <FaBookmark />
       </StatsContainer>
 
       <CommentList>
@@ -111,6 +107,13 @@ const CommentSection = ({ currentpost, setCurrentPost }) => {
         />
         <PostButton onClick={handleComment}>Post</PostButton>
       </CommentInputContainer>
+
+      {showSharePopup && (
+        <SharePostPopup
+          post={currentpost}
+          onClose={() => setShowSharePopup(false)}
+        />
+      )}
     </>
   );
 };
@@ -195,4 +198,43 @@ const PostButton = styled.button`
   border-radius: 12px;
   font-size: 14px;
   cursor: pointer;
+`;
+
+const Container = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #dbdbdb;
+`;
+
+const LeftSection = styled.div`
+  display: flex;
+  gap: 15px;
+`;
+
+const RightSection = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const IconButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #262626;
+  font-size: 24px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #8e8e8e;
+  }
+`;
+
+const ShareButton = styled(IconButton)`
+  font-size: 20px;
 `;
