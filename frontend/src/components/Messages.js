@@ -142,7 +142,7 @@ const Messages = () => {
 
   return (
     <Container>
-      <CloseButton onClick={handleCloseMessages}>
+      <CloseButton onClick={handleCloseMessages} showUserList={showUserList}>
         <FaTimes />
       </CloseButton>
       <UserListContainer showUserList={showUserList}>
@@ -281,5 +281,9 @@ const CloseButton = styled.button`
     background-color: rgba(255, 255, 255, 1);
     color: #006d77;
     transform: scale(1.05);
+  }
+  
+  @media (max-width: 768px) {
+    display: ${props => props.showUserList ? 'flex' : 'none'};
   }
 `;
