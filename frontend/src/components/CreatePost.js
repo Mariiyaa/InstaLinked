@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useDropzone } from "react-dropzone";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaCloudUploadAlt, FaEllipsisH, FaRegHeart, FaRegComment } from "react-icons/fa";
 
 const contentTypes = {
   Image: "image/*",
@@ -86,10 +87,34 @@ const CreatePost = () => {
           setFile(null);
           return;
         }
-
-        setFile(file);
-        setPreviewURL(URL.createObjectURL(file));
-        setError("");
+        
+        // Check video duration for Reels (must be <= 60 seconds)
+        if (selectedType === "Reel") {
+          const videoElement = document.createElement('video');
+          videoElement.preload = 'metadata';
+          
+          videoElement.onloadedmetadata = function() {
+            window.URL.revokeObjectURL(videoElement.src);
+            const duration = videoElement.duration;
+            
+            if (duration > 45) {
+              setError(`Reel videos cannot be longer than 45 seconds. Your video is ${Math.round(duration)} seconds.`);
+              setFile(null);
+              setPreviewURL("");
+              return;
+            } else {
+              setFile(file);
+              setPreviewURL(URL.createObjectURL(file));
+              setError("");
+            }
+          };
+          
+          videoElement.src = URL.createObjectURL(file);
+        } else {
+          setFile(file);
+          setPreviewURL(URL.createObjectURL(file));
+          setError("");
+        }
       }
     },
   });
@@ -134,12 +159,19 @@ const CreatePost = () => {
 
           <Dropzone {...getRootProps()}>
             <input {...getInputProps()} />
-            {previewURL ? <PreviewImage src={previewURL} alt="Preview" /> : <p>Drag & Drop or Click to Select {selectedType}</p>}
+            {previewURL ? (
+              <PreviewImage src={previewURL} alt="Preview" />
+            ) : (
+              <DropzoneContent>
+                <FaCloudUploadAlt size={48} color="#116466" />
+                <p>Drag & Drop or Click to Select {selectedType}</p>
+              </DropzoneContent>
+            )}
           </Dropzone>
           {error && <ErrorMessage>{error}</ErrorMessage>}
 
           <TextArea placeholder="Write your caption..." value={caption} onChange={(e) => setCaption(e.target.value)} />
-          <Input type="text" placeholder="Tag people" value={tags} onChange={(e) => setTags(e.target.value)} />
+          <Input type="text" placeholder="Tag people" value={tags} onChange={(e) => setTags(e.target.value)} disabled />
           <Input type="text" placeholder="Add hashtags" value={hashtags} onChange={(e) => setHashtags(e.target.value)} />
 
           <Button primary onClick={handlePublish}>Publish</Button>
@@ -149,43 +181,95 @@ const CreatePost = () => {
         {/* Right Section */}
         <RightSection>
           <Title>Preview</Title>
-          <PreviewCard>
-            <UserInfo>
-              <Avatar>👤</Avatar>
-              <div>
-                <strong>Sarah Johnson</strong>
-                <p>UX Designer • 2h</p>
-              </div>
-            </UserInfo>
-            <p>{caption || "Your caption will appear here..."}</p>
-            {file && <PreviewImage src={file} alt="Post Preview" />}
-            <Engagement>
-              ❤️ 2.4k | 💬 148 | 🔗 Share
-            </Engagement>
-          </PreviewCard>
-
-          <Title>Recent Posts</Title>
-          <RecentPost>
-            <PostIcon>🖼️</PostIcon>
-            <div>
-              <p>Sample image post</p>
-              <small>2 hours ago • ❤️ 24 • 💬 8</small>
-            </div>
-          </RecentPost>
-          <RecentPost>
-            <PostIcon>🎥</PostIcon>
-            <div>
-              <p>Sample video post</p>
-              <small>5 hours ago • ❤️ 42 • 💬 212</small>
-            </div>
-          </RecentPost>
-          <RecentPost>
-            <PostIcon>🎵</PostIcon>
-            <div>
-              <p>Sample audio post</p>
-              <small>8 hours ago • ❤️ 18 • 💬 5</small>
-            </div>
-          </RecentPost>
+          <PreviewCardWrapper>
+            <PreviewCardContent>
+              <PreviewCardLeftSection>
+                {previewURL ? (
+                  <>
+                    {selectedType === "Image" && <PreviewImage src={previewURL} alt="Post Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    {(selectedType === "Reel" || selectedType === "Documentary") && (
+                      <video 
+                        src={previewURL} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        controls
+                      />
+                    )}
+                    {selectedType === "Audio" && (
+                      <div style={{ background: '#000', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                        <div style={{ fontSize: '36px', marginBottom: '10px' }}>🎵</div>
+                        <audio src={previewURL} controls style={{ width: '80%' }} />
+                      </div>
+                    )}
+                    {selectedType === "Pdf" && (
+                      <div style={{ background: '#000', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                        <div style={{ fontSize: '48px', marginBottom: '10px', color: 'white' }}>📄</div>
+                        <p style={{ color: 'white' }}>PDF Document</p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#ccc' }}>
+                    Post content will appear here
+                  </div>
+                )}
+              </PreviewCardLeftSection>
+              
+              <PreviewCardRightSection>
+                <PreviewHeader>
+                  <UserInfo>
+                    <ProfileImage 
+                      src={userObject.profileImage || '/default-profile.png'} 
+                      alt={userObject.username || "User"}
+                    />
+                    <div>
+                      <Username>{userObject.username || userObject.email}</Username>
+                      <p style={{ fontSize: '12px', color: '#666', margin: '0' }}>{userObject.occupation || "User"}</p>
+                    </div>
+                  </UserInfo>
+                  <div>
+                    <FaEllipsisH />
+                  </div>
+                </PreviewHeader>
+                
+                <PreviewContent>
+                  {caption && (
+                    <CaptionWrapper>
+                      <strong style={{ marginRight: '8px' }}>
+                        {userObject.username || userObject.email}
+                      </strong>
+                      {caption}
+                    </CaptionWrapper>
+                  )}
+                  
+                  {hashtags && (
+                    <HashtagWrapper>
+                      #{hashtags.split(" ").join(" #")}
+                    </HashtagWrapper>
+                  )}
+                  
+                  <CommentsPreview>
+                    <p style={{ color: '#8e8e8e', fontSize: '14px' }}>No comments yet</p>
+                  </CommentsPreview>
+                </PreviewContent>
+                
+                <PreviewFooter>
+                  <div>
+                    <div style={{ display: 'flex', gap: '16px', marginBottom: '10px' }}>
+                      <FaRegHeart size={24} />
+                      <FaRegComment size={24} />
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>0 likes</div>
+                    <div style={{ color: '#8e8e8e', fontSize: '10px', textTransform: 'uppercase', marginBottom: '10px' }}>Just now</div>
+                  </div>
+                  
+                  <CommentInputPreview>
+                    <input type="text" placeholder="Add a comment..." disabled />
+                    <button disabled>Post</button>
+                  </CommentInputPreview>
+                </PreviewFooter>
+              </PreviewCardRightSection>
+            </PreviewCardContent>
+          </PreviewCardWrapper>
         </RightSection>
       </Content>
     </Container>
@@ -407,30 +491,110 @@ const PostIcon = styled.div`
   font-size: 24px;
   margin-right: 10px;
 `;
-const PreviewCard = styled.div`
-  background: #f1f1f1;
-  padding: 10px;
-  border-radius: 5px;
-  text-align: center;
+const PreviewCardWrapper = styled.div`
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #dbdbdb;
+  overflow: hidden;
+  height: 400px;
   
-  @media (max-width: 480px) {
-    padding: 8px;
+  @media (max-width: 768px) {
+    height: auto;
   }
+`;
+
+const PreviewCardContent = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+`;
+
+const PreviewCardLeftSection = styled.div`
+  flex: 1;
+  background: black;
+  position: relative;
+  overflow: hidden;
+`;
+
+const PreviewCardRightSection = styled.div`
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #dbdbdb;
+  height: 100%;
+`;
+
+const PreviewHeader = styled.div`
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #efefef;
 `;
 
 const UserInfo = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
 `;
 
-const Avatar = styled.div`
-  font-size: 24px;
+const ProfileImage = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
   margin-right: 10px;
 `;
 
-const Engagement = styled.div`
+const Username = styled.strong`
+  font-size: 16px;
+  font-weight: 500;
+`;
+
+const PreviewContent = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+`;
+
+const CaptionWrapper = styled.div`
+  margin-bottom: 10px;
+`;
+
+const HashtagWrapper = styled.div`
+  margin-bottom: 10px;
+  color: #116466;
+  font-weight: 500;
+`;
+
+const CommentsPreview = styled.div`
+  margin-bottom: 10px;
+`;
+
+const PreviewFooter = styled.div`
+  padding: 10px;
+  border-top: 1px solid #efefef;
+`;
+
+const CommentInputPreview = styled.div`
+  display: flex;
+  padding: 8px 0;
   margin-top: 10px;
+
+  input {
+    flex: 1;
+    border: none;
+    padding: 8px;
+    background: none;
+    outline: none;
+  }
+
+  button {
+    background: none;
+    border: none;
+    color: #0095f6;
+    font-weight: 600;
+    opacity: 0.3;
+  }
 `;
 
 const ErrorMessage = styled.p`
@@ -438,4 +602,18 @@ const ErrorMessage = styled.p`
   font-size: 14px;
   text-align: center;
   margin-top: 5px;
+`;
+
+const DropzoneContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 10px;
+
+  p {
+    margin-top: 10px;
+    color: #666;
+  }
 `;

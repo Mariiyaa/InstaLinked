@@ -67,54 +67,106 @@ const PopUPexplore = () => {
     }
 
     return (
-        <ModalOverlay >
-            <ModalContent onClick={(e) => e.stopPropagation()}>
-                <CloseButton onClick={() => navigate(-1)}>&times;</CloseButton>
-                <MediaContainer>
-                {currentPost.content_type === "Pdf" && (
-                        <MediaPdf src={currentPost.url} alt="Post" />
-                    )}
-                    {currentPost.content_type === "Image" && (
-                        <MediaImage src={currentPost.url} alt="Post" />
-                    )}
-                    {["Documentary", "Reel"].includes(currentPost.content_type) && (
-                        <MediaVideo src={currentPost.url} controls />
-                    )}
-                    {currentPost.content_type === "Audio" && (
-                        <AudioWrapper>
-                            <AudioThumbnail src={disk} alt="Audio Disk" />
-                            <audio controls src={currentPost.url}></audio>
-                        </AudioWrapper>
-                    )}
-                </MediaContainer>
-                <CommentSection>
+        <ModalOverlay>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <CloseButton onClick={() => navigate(-1)}>&times;</CloseButton>
+      
+            {/* Mobile-only UserDetails above media */}
+            <MobileUserDetails>
+              <UserDetails>
+                <UserImg src={currentPost?.user?.profileImage || default_user} alt="User" />
+                <div>
+                  <p style={{ fontWeight: "bold", fontSize: "16px" }}>
+                    {currentPost?.user?.fullName || "Unknown User"}
+                  </p>
+                  <p style={{ fontSize: "12px", padding: "10px", color: "#fff" }}>
+                    {new Date(currentPost?.created_at).toLocaleString()}
+                  </p>
+                </div>
+              </UserDetails>
+            </MobileUserDetails>
+      
+            <MediaContainer>
+              {currentPost.content_type === "Pdf" && <MediaPdf src={currentPost.url} alt="Post" />}
+              {currentPost.content_type === "Image" && <MediaImage src={currentPost.url} alt="Post" />}
+              {["Documentary", "Reel"].includes(currentPost.content_type) && (
+                <MediaVideo src={currentPost.url} controls />
+              )}
+              {currentPost.content_type === "Audio" && (
+                <AudioWrapper>
+                  <AudioThumbnail src={disk} alt="Audio Disk" />
+                  <audio controls src={currentPost.url}></audio>
+                </AudioWrapper>
+              )}
+            </MediaContainer>
+      
+            <CommentSection>
+              {/* Desktop-only UserDetails */}
+              <DesktopUserDetails>
                 <UserDetails>
-  <UserImg
-    src={currentPost?.user?.profileImage || default_user} // Use user's profile image if available, fallback to default
-    alt="User"
-  />
-  <div>
-    <p style={{ fontWeight: "bold", fontSize: "16px" }}>
-      {currentPost?.user?.fullName || "Unknown User"} {/* Display user's full name */}
-    </p>
-    <p style={{ fontSize: "12px", padding:"10px",color: "#fff" }}>
-      {new Date(currentPost?.created_at).toLocaleString()} {/* Format the post creation time */}
-    </p>
-  </div>
-</UserDetails>
-
-            <Caption>
-                {currentPost?.caption || "This is a detailed caption for the post. It can contain multiple lines of text and will wrap around when it reaches the end of the container. #design #ui #ux #wireframe"}
-                <br />
-              
-            </Caption>
-        <UserInteraction  setCurrentPost={setCurrentPost} currentpost={currentPost}/>
-        </CommentSection>
-                <NavLeftButton onClick={() => handleNavigate("prev")}><FaArrowLeft size={30} style={{zIndex:1000,position:'absolute',color:'white',top:0,right:0,padding:'5px',backgroundColor:"hsla(171, 89.50%, 7.50%, 0.62)"}}></FaArrowLeft></NavLeftButton>
-                <NavRightButton onClick={() => handleNavigate("next")}><FaArrowRight size={30} style={{zIndex:1000,position:'absolute',color:'white',top:0,right:0,padding:'5px',backgroundColor:"hsla(171, 89.50%, 7.50%, 0.62)"}} /> </NavRightButton>
-            </ModalContent>
+                  <UserImg src={currentPost?.user?.profileImage || default_user} alt="User" />
+                  <div>
+                    <p style={{ fontWeight: "bold", fontSize: "16px" }}>
+                      {currentPost?.user?.fullName || "Unknown User"}
+                    </p>
+                    <p style={{ fontSize: "12px", padding: "10px", color: "#fff" }}>
+                      {new Date(currentPost?.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                </UserDetails>
+              </DesktopUserDetails>
+      
+              <Caption>{currentPost?.caption || "This is a caption..."}</Caption>
+      
+              {currentPost?.hashtags && (
+                <HashtagsContainer>
+                  {Array.isArray(currentPost.hashtags)
+                    ? currentPost.hashtags.map((tag, index) => (
+                        <Hashtag key={index}>#{tag}</Hashtag>
+                      ))
+                    : typeof currentPost.hashtags === "string"
+                    ? currentPost.hashtags.split(" ").map((tag, index) => (
+                        <Hashtag key={index}>#{tag}</Hashtag>
+                      ))
+                    : null}
+                </HashtagsContainer>
+              )}
+      
+              <UserInteraction setCurrentPost={setCurrentPost} currentpost={currentPost} />
+            </CommentSection>
+      
+            <NavLeftButton onClick={() => handleNavigate("prev")}>
+              <FaArrowLeft
+                size={30}
+                style={{
+                  zIndex: 1000,
+                  position: "absolute",
+                  color: "white",
+                  top: 0,
+                  right: 0,
+                  padding: "5px",
+                  backgroundColor: "hsla(171, 89.50%, 7.50%, 0.62)",
+                }}
+              />
+            </NavLeftButton>
+            <NavRightButton onClick={() => handleNavigate("next")}>
+              <FaArrowRight
+                size={30}
+                style={{
+                  zIndex: 1000,
+                  position: "absolute",
+                  color: "white",
+                  top: 0,
+                  right: 0,
+                  padding: "5px",
+                  backgroundColor: "hsla(171, 89.50%, 7.50%, 0.62)",
+                }}
+              />
+            </NavRightButton>
+          </ModalContent>
         </ModalOverlay>
-    );
+      );
+      
 };
 
 export default PopUPexplore;
@@ -148,7 +200,7 @@ const ModalContent = styled.div`
     @media (max-width: 768px) {
         flex-direction: column;
         width: 90%;
-        height: 80%;
+        height: 70%;
     }
     
     @media (max-width: 480px) {
@@ -194,7 +246,7 @@ const MediaContainer = styled.div`
     padding:0px;
     
     @media (max-width: 768px) {
-        max-height: 50%;
+        max-height: 40%;
     }
 `;
 
@@ -249,84 +301,6 @@ const Caption = styled.p`
     color: #333;
 `;
 
-const StatsContainer = styled.div`
-flex:1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 12px 0;
-    padding:10px;
-    border-bottom: 1px solid #ddd;
-`;
-
-const StatItem = styled.div`
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    margin-right: 16px;
-
-    svg {
-        margin-right: 6px;
-        color: #555;
-    }
-`;
-
-const CommentList = styled.div`
-    margin-top: 12px;
-    padding:10px;
-    flex:1;
-`;
-
-const Comment = styled.div`
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 8px;
-`;
-
-const CommentText = styled.div`
-    margin-left: 12px;
-`;
-
-const CommentUser = styled.span`
-    font-weight: bold;
-    font-size: 14px;
-`;
-
-const CommentTime = styled.p`
-    font-size: 12px;
-    color: #777;
-    margin: 2px 0;
-`;
-
-const CommentInputContainer = styled.div`
-flex:1;
-    display: flex;
-    align-items: center;
-    margin-top: 16px;
-    padding:10px;
-   position: relative;
-   bottom:0;
-`;
-
-const CommentInput = styled.input`
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    font-size: 14px;
-    outline: none;
-`;
-
-const PostButton = styled.button`
-    margin-left: 8px;
-    background-color: #008080;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 14px;
-    cursor: pointer;
-`;
 
 const NavButton = styled.button`
     position: absolute;
@@ -348,3 +322,35 @@ const NavLeftButton = styled(NavButton)`
 const NavRightButton = styled(NavButton)`
     right: 10px;
 `;
+
+const HashtagsContainer = styled.div`
+    padding: 0 10px 10px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+`;
+
+const Hashtag = styled.span`
+    color: #006D77;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    &:hover {
+        text-decoration: underline;
+    }
+`;
+const MobileUserDetails = styled.div`
+  display: none;
+  @media (max-width: 768px) {
+    display: block;
+    width: 100%;
+  }
+`;
+
+const DesktopUserDetails = styled.div`
+  display: block;
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+

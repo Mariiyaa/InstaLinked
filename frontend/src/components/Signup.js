@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { auth } from "../firebaseConfig"; 
+import bookshelves from "../assets/bookshelves-amico.png"
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import Footer from './Footer';
 
@@ -68,7 +69,7 @@ const Signup = () => {
 
       <PageWrapper>
         <Main>
-          <Placeholder />
+          <Placeholder src={bookshelves}/>
           <FormWrapper>
             <Title>Sign up</Title>
             <Subtitle>Welcome</Subtitle>
@@ -118,15 +119,17 @@ const Signup = () => {
           />
           sign up with Google
         </GoogleButton>
-        <FacebookButton>
+        {/* <FacebookButton>
                 <GoogleLogo src="facebookicon.png" alt="Google Logo" />
                 sign up with Facebook
-                </FacebookButton>
+                </FacebookButton> */}
               </OAuthButtons>
 
               
             </Form>
-            <SignupLink>Returning user? <Link to="/login"><LoginLink>Login here</LoginLink></Link></SignupLink>
+            <LoginLink>
+  Returning user? <span onClick={() => navigate('/login')}>Login here</span>
+</LoginLink>
           </FormWrapper>
           
         </Main>
@@ -143,8 +146,8 @@ export default Signup;
 const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background: #f8f9fa;
+  min-height: 100vh;
+  background: #f4f2ee;
 `;
 
 const Main = styled.main`
@@ -155,52 +158,54 @@ const Main = styled.main`
   padding: 50px;
 `;
 
-const Placeholder = styled.div`
+const Placeholder = styled.img`
   width: 500px;
-  height: 300px;
-  background: #e0e0e0;
+  height: 400px;
   border-radius: 10px;
 `;
 
 const FormWrapper = styled.div`
-width: 500px;
-  padding: 30px 60px;
-  background: #fff;
-  justify-self: center;
-  align-self: center;
+  width: 500px;
+  padding: 30px;
+  background: #ffffff;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 `;
 
 const Title = styled.h2`
+  margin-bottom: 25px;
   text-align: center;
   font-size: 24px;
-  margin-bottom:10px;
-  color: #333;
+  color: #000000;
+  font-weight: bold;
 `;
 
 const Subtitle = styled.p`
   text-align: center;
-  margin-bottom:10px;
-  color: #666;
+  margin-bottom: 10px;
+  color: #000000;
+  font-weight: bold;
 `;
 
 const Form = styled.form`
   display: flex;
-  width:100%;
-  justify-self: center;
-  align-self: center;
-  gap: 10px;
-  margin-bottom:10px;
   flex-direction: column;
+  gap: 15px;
+  margin-bottom: 10px;
 `;
 
 const Input = styled.input`
   margin-bottom: 10px;
-  width:100%;
+  width: 100%;
   padding: 12px;
+  border: 1px solid #ccc;
   font-size: 16px;
   border-radius: 5px;
+ transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #006d77;
+  }
 `;
 
 const CheckboxWrapper = styled.div`
@@ -215,16 +220,37 @@ const CheckboxLabel = styled.label`
   color: #555;
   padding-left:10px;
 `;
+const LoginLink = styled.div`
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+  color: #555;
+
+  span {
+    color: #006d77;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
 
 const SubmitButton = styled.button`
   padding: 12px;
+  font-size: 16px;
   color: #fff;
-  background-color: #004d4d;
+  background-color: #006d77;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-`;
+  transition: background-color 0.2s;
 
+  &:hover {
+    background-color: #004d55;
+  }
+`;
 const OAuthButtons = styled.div`
   display: flex;
   gap: 10px;
@@ -236,19 +262,12 @@ const GoogleButton = styled.button`
   background: white;
   border: 1px solid #ddd;
   display: flex;
-    position: relative;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 15px;
-    border: none;
-    background-color: #ffffff;
-    color: #757575;
-    font-size: 13px;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 `;
 
 
@@ -282,10 +301,8 @@ const SignupLink = styled.p`
   text-decoration:none;
  
 `;
-const LoginLink=styled.p`
- color:#004d4d;
- text-decoration: none;
-`
+
+
 
 const ErrorMessage = styled.div`
   color: red;

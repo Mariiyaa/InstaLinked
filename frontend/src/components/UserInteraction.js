@@ -175,8 +175,10 @@ const CommentTime = styled.p`
 
 const CommentInputContainer = styled.div`
   display: flex;
+  position: relative;
   align-items: center;
   margin-top: 16px;
+  bottom:0px;
   padding: 10px;
 `;
 

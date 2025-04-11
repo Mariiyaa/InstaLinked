@@ -206,7 +206,7 @@ export default Messages;
 
 const Container = styled.div`
   display: flex;
-  height: calc(100vh - 60px);
+  height: 98vh;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
@@ -216,7 +216,7 @@ const Container = styled.div`
   overflow: hidden;
   
   @media (max-width: 768px) {
-    height: calc(100vh - 50px);
+    height: 100vh;
     border-radius: 0;
   }
 `;

@@ -123,11 +123,12 @@ const ChatWindow = ({ selectedUser, messages, sendMessage, currentUser }) => {
     <Container>
       {selectedUser ? (
         <>
-      <Header>
-          <UserAvatar src={selectedUser.profileImage}/>
-          <UserName>{selectedUser.email}
-          <Status isOnline={isOnline}>{isOnline ? "Online" : "Offline"}</Status>
-          </UserName>
+          <Header>
+            <UserAvatar src={selectedUser.profileImage} alt={selectedUser.email}/>
+            <UserInfo>
+              <UserName>{selectedUser.email}</UserName>
+              <Status isOnline={isOnline}>{isOnline ? "Online" : "Offline"}</Status>
+            </UserInfo>
           </Header>
           <MessagesContainer>
             {messages.map((msg, index) => renderMessage(msg, index))}
@@ -160,6 +161,8 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   background-color: #f5f5f5;
+  height: 100vh; /* Ensure it takes full viewport height */
+  overflow: hidden; /* Prevent overall container from scrolling */
   
   @media (max-width: 768px) {
     height: 100%;
@@ -168,15 +171,25 @@ const Container = styled.div`
 
 const Header = styled.div`
   background: #FAFAFA;
-  padding: 10px;
+  padding: 10px 15px;
   display: flex;
   align-items: center;
-  font-weight: bold;
+  border-bottom: 1px solid #eaeaea;
+  min-height: 60px; /* Ensure minimum height for header */
   
   @media (max-width: 768px) {
-    padding: 8px;
+    padding: 8px 12px;
+    min-height: 50px;
   }
 `;
+
+const UserInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden; /* Prevent text overflow */
+`;
+
 const UserAvatar = styled.img`
   width: 40px;
   height: 40px;
@@ -188,6 +201,7 @@ const UserAvatar = styled.img`
   align-items: center;
   justify-content: center;
   margin-right: 10px;
+  object-fit: cover;
   
   @media (max-width: 480px) {
     width: 32px;
@@ -196,12 +210,18 @@ const UserAvatar = styled.img`
 `;
 
 const Status = styled.div`
-  font-size: 14px;
+  font-size: 12px;
   color: ${(props) => (props.isOnline ? "green" : "red")};
-  font-weight: bold;
-;`
+  font-weight: 500;
+`;
+
 const UserName = styled.div`
   font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 `;
 
 const MessagesContainer = styled.div`
@@ -211,6 +231,25 @@ const MessagesContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
+  height: 0; /* This forces the container to respect flex: 1 */
+  
+  /* Custom scrollbar for better visibility */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
   
   @media (max-width: 768px) {
     padding: 15px;
@@ -218,6 +257,11 @@ const MessagesContainer = styled.div`
   
   @media (max-width: 480px) {
     padding: 10px;
+  }
+  
+  @media (min-width: 1200px) {
+    /* Specific desktop styling */
+    padding: 20px 30px;
   }
 `;
 
@@ -229,6 +273,7 @@ const Message = styled.div`
   color: ${props => props.isOwnMessage ? "white" : "#333"};
   align-self: ${props => props.isOwnMessage ? "flex-end" : "flex-start"};
   word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   
   @media (max-width: 768px) {
     max-width: 80%;
@@ -253,16 +298,6 @@ const SharedPostMessage = styled(Message)`
   @media (max-width: 480px) {
     max-width: 90%;
   }
-`;
-
-const SharedPostContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const SharedPostText = styled.div`
-  margin-bottom: 5px;
 `;
 
 const SharedPostCard = styled.div`
@@ -299,12 +334,6 @@ const SharedPostDetails = styled.div`
   }
 `;
 
-const SharedPostAuthor = styled.div`
-  font-weight: 500;
-  margin-bottom: 5px;
-  color:black
-`;
-
 const SharedPostCaption = styled.div`
   color: #666;
   font-size: 0.9em;
@@ -320,6 +349,7 @@ const InputContainer = styled.form`
   border-top: 1px solid #ddd;
   display: flex;
   gap: 10px;
+  min-height: 65px; /* Ensure input area has consistent height */
 `;
 
 const Input = styled.input`
@@ -365,6 +395,7 @@ const DateSeparator = styled.div`
   text-align: center;
   color: #888;
   font-size: 0.8em;
+  margin: 10px 0;
   
   @media (max-width: 480px) {
     font-size: 0.7em;

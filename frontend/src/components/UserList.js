@@ -236,6 +236,7 @@ const Container = styled.div`
 const SearchBar = styled.input`
   padding: 10px;
   border: none;
+  height: 50px;
   border-bottom: 1px solid #e0e0e0;
   outline: none;
   font-size: 14px;

@@ -28,9 +28,13 @@ export const SocketProvider = ({ children }) => {
             // Socket connection event handlers
             newSocket.on('connect', () => {
                 console.log('SocketContext: Socket connected successfully');
-                // Join user's room for notifications
-                newSocket.emit('join', user._id.toString());
-                console.log('SocketContext: Joined room:', user._id.toString());
+                // Join user's room for notifications - safely access user._id
+                if (user && user._id) {
+                    newSocket.emit('join', user._id.toString());
+                    console.log('SocketContext: Joined room:', user._id.toString());
+                } else {
+                    console.warn('SocketContext: Could not join room - user._id is undefined');
+                }
             });
 
             newSocket.on('connect_error', (error) => {

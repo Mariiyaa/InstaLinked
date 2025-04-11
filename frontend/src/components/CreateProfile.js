@@ -7,6 +7,7 @@ import AppNavbar from "./AppNavbar";
 const ProfileEdit = () => {
   const user = JSON.parse(sessionStorage.getItem("user"));
   const [message, setMessage] = useState("");
+  const [preview, setPreview] = useState(null);
 
   console.log("ProfileEdit received userData:", user);
   const [userProfile, setUserProfile] = useState({
@@ -32,24 +33,43 @@ const ProfileEdit = () => {
       console.error("userData is undefined or null");
     }
   };
+
   useEffect(() => {
     if (user) {
       setUserProfile((prev) => ({
         ...prev,
         ...user,
-        fullName:user.fullName,
-        contentPreferences:user.contentPreferences || [],
-        personas: user.personas || [],// Use data from context
+        fullName: user.fullName,
+        contentPreferences: user.contentPreferences || [],
+        personas: user.personas || [], // Use data from context
         profileImage: user.profileImage || null,
       }));
+      
+      // If user has a profile image already, set it as preview
+      if (user.profileImage) {
+        setPreview(user.profileImage);
+      }
     }
   }, []);
+
+  // Clean up object URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (preview && typeof preview === 'string' && preview.startsWith('blob:')) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = file;
-      setUserProfile({ ...userProfile, profileImage: imageUrl });
+      // Create a URL for the file to display preview
+      const imageUrl = URL.createObjectURL(file);
+      setPreview(imageUrl);
+      
+      // Keep the actual file in state for upload
+      setUserProfile({ ...userProfile, profileImage: file });
     }
   };
 
@@ -68,9 +88,14 @@ const ProfileEdit = () => {
 
     try {
       const formData = new FormData();
+      
+      // Add all fields to formData
       Object.keys(userProfile).forEach((key) => {
-        if (key === "externalLinks") {
+        if (key === "externalLinks" || key === "persona" || key === "contentPreferences") {
           formData.append(key, JSON.stringify(userProfile[key]));
+        } else if (key === "profileImage" && userProfile[key] && typeof userProfile[key] === 'object') {
+          // If profileImage is a File object, append it directly
+          formData.append(key, userProfile[key]);
         } else {
           formData.append(key, userProfile[key]);
         }
@@ -79,12 +104,13 @@ const ProfileEdit = () => {
       const response = await axios.post("/api/profile/create-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      saveUserTosessionStorage(userProfile)
-      saveUserTosessionStorage(response.data.user)
+      
+      saveUserTosessionStorage(response.data.user);
       setMessage(response.data.message);
 
     } catch (error) {
       console.error("Error uploading profile", error);
+      setMessage("Error saving profile. Please try again.");
     }
   };
 
@@ -96,15 +122,15 @@ const ProfileEdit = () => {
           <FormContainer>
             <Title>Edit Your Profile</Title>
             <ProfilePhoto>
-  <input type="file" id="fileUpload" hidden accept="image/*" onChange={handleFileChange} />
-  <Label htmlFor="fileUpload">
-    {userProfile.profileImage ? (
-      <ProfileImage src={userProfile.profileImage} alt="Profile Preview" />
-    ) : (
-      <p style={{textAlign:"center"}}> Upload Photo</p>
-    )}
-  </Label>
-</ProfilePhoto>
+              <input type="file" id="fileUpload" hidden accept="image/*" onChange={handleFileChange} />
+              <Label htmlFor="fileUpload">
+                {preview ? (
+                  <ProfileImage src={preview} alt="Profile Preview" />
+                ) : (
+                  <p style={{textAlign:"center"}}> Upload Photo</p>
+                )}
+              </Label>
+            </ProfilePhoto>
 
             <Form onSubmit={handleSubmit}>
               <Row>
@@ -145,7 +171,6 @@ const ProfileEdit = () => {
                 placeholder="About you"
                 value={userProfile.bio}
                 onChange={(e) => setUserProfile({ ...userProfile, bio: e.target.value })}
-                
               ></Textarea>
               <p> Date of Birth :</p>
               <Row>
@@ -176,170 +201,169 @@ const ProfileEdit = () => {
                   onChange={(e) => setUserProfile({ ...userProfile, location: e.target.value })}
                 />
               </Row>
-             {/* Personas Selector */}
-<select
-  multiple
-  value={userProfile.persona || []}
-  onChange={(e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
+              {/* Personas Selector */}
+              <select
+                multiple
+                value={userProfile.persona || []}
+                onChange={(e) => {
+                  const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
 
-    // Update state while avoiding duplicates
-    setUserProfile((prevProfile) => ({
-      ...prevProfile,
-      persona: Array.from(new Set([...prevProfile.persona, ...selectedOptions])),
-    }));
-  }}
-  style={{
-    width: '100%',
-    padding: '5px',
-    border: '1px solid #ccc',
-    borderRadius: '5px',
-    height: '120px', // Allow space for multiple selections
-  }}
->
-  <option value="Heritage Lover">Heritage Lover</option>
-  <option value="Explorer">Explorer</option>
-  <option value="Researcher">Researcher</option>
-  <option value="Practitioner">Practitioner</option>
-  <option value="Conservator">Conservator</option>
-  <option value="Artist">Artist</option>
-</select>
+                  // Update state while avoiding duplicates
+                  setUserProfile((prevProfile) => ({
+                    ...prevProfile,
+                    persona: Array.from(new Set([...prevProfile.persona, ...selectedOptions])),
+                  }));
+                }}
+                style={{
+                  width: '100%',
+                  padding: '5px',
+                  border: '1px solid #ccc',
+                  borderRadius: '5px',
+                  height: '120px', // Allow space for multiple selections
+                }}
+              >
+                <option value="Heritage Lover">Heritage Lover</option>
+                <option value="Explorer">Explorer</option>
+                <option value="Researcher">Researcher</option>
+                <option value="Practitioner">Practitioner</option>
+                <option value="Conservator">Conservator</option>
+                <option value="Artist">Artist</option>
+              </select>
 
-{/* Display selected persona */}
-<div
-  style={{
-    marginTop: "10px",
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: "10px",
-    border: "1px solid #ccc",
-    padding: "5px",
-    borderRadius: "5px",
-    minHeight: "40px",
-  }}
->
-  {userProfile.persona && userProfile.persona.length > 0 ? (
-    userProfile.persona.map((persona) => (
-      <div
-        key={persona}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          backgroundColor: "#006D77",
-          padding: "5px 10px",
-          borderRadius: "5px",
-          fontSize: "14px",
-        }}
-      >
-        <p style={{ color: 'white' }}>{persona}</p>
-        <button
-          onClick={() => {
-            const updatedpersona = userProfile.persona.filter((p) => p !== persona);
-            setUserProfile({ ...userProfile, persona: updatedpersona });
-          }}
-          style={{
-            marginLeft: "8px",
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-            color: "#ffffff",
-            fontWeight: "bold",
-          }}
-        >
-          ✕
-        </button>
-      </div>
-    ))
-  ) : (
-    <span style={{ color: "#777", fontStyle: "italic" }}>No personas selected</span>
-  )}
-</div>
+              {/* Display selected persona */}
+              <div
+                style={{
+                  marginTop: "10px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "10px",
+                  border: "1px solid #ccc",
+                  padding: "5px",
+                  borderRadius: "5px",
+                  minHeight: "40px",
+                }}
+              >
+                {userProfile.persona && userProfile.persona.length > 0 ? (
+                  userProfile.persona.map((persona) => (
+                    <div
+                      key={persona}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        backgroundColor: "#006D77",
+                        padding: "5px 10px",
+                        borderRadius: "5px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <p style={{ color: 'white' }}>{persona}</p>
+                      <button
+                        onClick={() => {
+                          const updatedpersona = userProfile.persona.filter((p) => p !== persona);
+                          setUserProfile({ ...userProfile, persona: updatedpersona });
+                        }}
+                        style={{
+                          marginLeft: "8px",
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                          color: "#ffffff",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <span style={{ color: "#777", fontStyle: "italic" }}>No personas selected</span>
+                )}
+              </div>
 
-{/* Content Preferences Selector */}
-<select
-  multiple
-  value={userProfile.contentPreferences || []}
-  onChange={(e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
+              {/* Content Preferences Selector */}
+              <select
+                multiple
+                value={userProfile.contentPreferences || []}
+                onChange={(e) => {
+                  const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
 
-    // Update state while avoiding duplicates
-    setUserProfile((prevProfile) => ({
-      ...prevProfile,
-      contentPreferences: Array.from(new Set([...prevProfile.contentPreferences, ...selectedOptions])),
-    }));
-  }}
-  style={{
-    width: '100%',
-    padding: '5px',
-    border: '1px solid #ccc',
-    borderRadius: '5px',
-    height: '120px', // Allow space for multiple selections
-  }}
->
-  <option value="Articles">Articles</option>
-  <option value="Songs">Songs</option>
-  <option value="Research Papers">Research Papers</option>
-  <option value="Short Videos">Short Videos</option>
-  <option value="Documented Videos">Documented Videos</option>
-  <option value="Music">Music</option>
-  <option value="Art">Art</option>
-  <option value="Sculptures">Sculptures</option>
-  <option value="Monuments">Monuments</option>
-  <option value="Folklores">Folklores</option>
-</select>
+                  // Update state while avoiding duplicates
+                  setUserProfile((prevProfile) => ({
+                    ...prevProfile,
+                    contentPreferences: Array.from(new Set([...prevProfile.contentPreferences, ...selectedOptions])),
+                  }));
+                }}
+                style={{
+                  width: '100%',
+                  padding: '5px',
+                  border: '1px solid #ccc',
+                  borderRadius: '5px',
+                  height: '120px', // Allow space for multiple selections
+                }}
+              >
+                <option value="Articles">Articles</option>
+                <option value="Songs">Songs</option>
+                <option value="Research Papers">Research Papers</option>
+                <option value="Short Videos">Short Videos</option>
+                <option value="Documented Videos">Documented Videos</option>
+                <option value="Music">Music</option>
+                <option value="Art">Art</option>
+                <option value="Sculptures">Sculptures</option>
+                <option value="Monuments">Monuments</option>
+                <option value="Folklores">Folklores</option>
+              </select>
 
-{/* Display selected content preferences */}
-<div
-  style={{
-    marginTop: "10px",
-    display: "flex",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: "10px",
-    border: "1px solid #ccc",
-    padding: "5px",
-    borderRadius: "5px",
-    minHeight: "40px",
-  }}
->
-  {userProfile.contentPreferences && userProfile.contentPreferences.length > 0 ? (
-    userProfile.contentPreferences.map((content) => (
-      <div
-        key={content}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          backgroundColor: "#006D77",
-          padding: "5px 10px",
-          borderRadius: "5px",
-          fontSize: "14px",
-        }}
-      >
-        <p style={{ color: 'white' }}>{content}</p>
-        <button
-          onClick={() => {
-            const updatedContent = userProfile.contentPreferences.filter((p) => p !== content);
-            setUserProfile({ ...userProfile, contentPreferences: updatedContent });
-          }}
-          style={{
-            marginLeft: "8px",
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-            color: "#ffffff",
-            fontWeight: "bold",
-          }}
-        >
-          ✕
-        </button>
-      </div>
-    ))
-  ) : (
-    <span style={{ color: "#777", fontStyle: "italic" }}>No content preferences selected</span>
-  )}
-</div>
-
+              {/* Display selected content preferences */}
+              <div
+                style={{
+                  marginTop: "10px",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "10px",
+                  border: "1px solid #ccc",
+                  padding: "5px",
+                  borderRadius: "5px",
+                  minHeight: "40px",
+                }}
+              >
+                {userProfile.contentPreferences && userProfile.contentPreferences.length > 0 ? (
+                  userProfile.contentPreferences.map((content) => (
+                    <div
+                      key={content}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        backgroundColor: "#006D77",
+                        padding: "5px 10px",
+                        borderRadius: "5px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <p style={{ color: 'white' }}>{content}</p>
+                      <button
+                        onClick={() => {
+                          const updatedContent = userProfile.contentPreferences.filter((p) => p !== content);
+                          setUserProfile({ ...userProfile, contentPreferences: updatedContent });
+                        }}
+                        style={{
+                          marginLeft: "8px",
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                          color: "#ffffff",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <span style={{ color: "#777", fontStyle: "italic" }}>No content preferences selected</span>
+                )}
+              </div>
 
               <h3>Portfolio Links</h3>
               {userProfile.externalLinks.map((link, index) => (
@@ -369,50 +393,50 @@ const ProfileEdit = () => {
               </SocialMedia>
 
               <ButtonRow>
-                <SaveButton>Save & Continue</SaveButton>
-                <CancelButton>Cancel</CancelButton>
+                <SaveButton type="submit">Save & Continue</SaveButton>
+                <CancelButton type="button">Cancel</CancelButton>
               </ButtonRow>
               {message && <Message>{message}</Message>}
             </Form>
           </FormContainer>
         </MainContent>
-         {/* Right Sidebar */}
-      <Sidebar>
-        <Updates>
-          <h3>Platform Updates</h3>
-          <UpdateCard>
-            <Badge>New Feature</Badge>
-            <h4>Creator Collaboration Tool</h4>
-            <p>Start co-creating content now with our new collaboration features!</p>
-          </UpdateCard>
+        {/* Right Sidebar */}
+        <Sidebar>
+          <Updates>
+            <h3>Platform Updates</h3>
+            <UpdateCard>
+              <Badge>New Feature</Badge>
+              <h4>Creator Collaboration Tool</h4>
+              <p>Start co-creating content now with our new collaboration features!</p>
+            </UpdateCard>
 
-          <UpdateCard>
-            <Badge type="event">Event</Badge>
-            <h4>Digital Heritage Workshop</h4>
-            <p>Join us this Saturday for an interactive session.</p>
-          </UpdateCard>
+            <UpdateCard>
+              <Badge type="event">Event</Badge>
+              <h4>Digital Heritage Workshop</h4>
+              <p>Join us this Saturday for an interactive session.</p>
+            </UpdateCard>
 
-          <UpdateCard>
-            <Badge type="trending">Trending</Badge>
-            <h4>Folklore Stories</h4>
-            <p>Explore curated stories from around the world.</p>
-          </UpdateCard>
+            <UpdateCard>
+              <Badge type="trending">Trending</Badge>
+              <h4>Folklore Stories</h4>
+              <p>Explore curated stories from around the world.</p>
+            </UpdateCard>
 
-          <UpdateCard>
-            <Badge type="trending">Trending</Badge>
-            <h4>Fables and Tales</h4>
-          </UpdateCard>
-        </Updates>
+            <UpdateCard>
+              <Badge type="trending">Trending</Badge>
+              <h4>Fables and Tales</h4>
+            </UpdateCard>
+          </Updates>
 
-        <QuickLinks>
-          <h3>Quick Links</h3>
-          <LinkItem>🌟 Change Theme</LinkItem>
-          <LinkItem>🔒 Privacy Settings</LinkItem>
-          <LinkItem>🔑 Change Password</LinkItem>
-          <LinkItem>🌎 Language Preference</LinkItem>
-          <LinkItem>🔔 Notification Settings</LinkItem>
-        </QuickLinks>
-      </Sidebar>
+          <QuickLinks>
+            <h3>Quick Links</h3>
+            <LinkItem>🌟 Change Theme</LinkItem>
+            <LinkItem>🔒 Privacy Settings</LinkItem>
+            <LinkItem>🔑 Change Password</LinkItem>
+            <LinkItem>🌎 Language Preference</LinkItem>
+            <LinkItem>🔔 Notification Settings</LinkItem>
+          </QuickLinks>
+        </Sidebar>
       </Container>
     </>
   );
@@ -425,7 +449,9 @@ export default ProfileEdit;
 
 const Container = styled.div`
   width: 60%;
-  margin: 20px auto;
+  margin:8%;
+  align-self: center;
+  justify-self: center;
   background: #f8f9fa;
   padding: 20px;
   border-radius: 10px;
@@ -493,6 +519,10 @@ const ProfilePhoto = styled.div`
   width: 150px;
   height: 150px;
   margin: 0 auto 20px;
+  border: 2px dashed #ddd;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
   
   @media (max-width: 768px) {
     width: 120px;
@@ -506,14 +536,12 @@ const ProfilePhoto = styled.div`
 `;
 
 const Label = styled.label`
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  
-  @media (max-width: 480px) {
-    font-size: 14px;
-    margin-bottom: 5px;
-  }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
 `;
 
 const ProfileImage = styled.img`
@@ -532,6 +560,11 @@ const Form = styled.form`
 const Row = styled.div`
   display: flex;
   gap: 10px;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 5px;
+  }
 `;
 
 const Input = styled.input`
@@ -604,13 +637,17 @@ const Button = styled.button`
 `;
 
 const SaveButton = styled(Button)`
-background-color: #006D77;
+  background-color: #006D77;
 `;
 
 const CancelButton = styled(Button)`
   background: #e0e0e0;
   color: black;
-  width:30%
+  width: 30%;
+  
+  @media (max-width: 480px) {
+    width: 100%;
+  }
 `;
 
 const SocialMedia = styled.div`
@@ -621,6 +658,7 @@ const SocialMedia = styled.div`
 
 const Icon = styled.div`
   font-size: 24px;
+  cursor: pointer;
 `;
 
 const Message = styled.p`
@@ -628,7 +666,7 @@ const Message = styled.p`
   color: green;
 `;
 
-export const Sidebar = styled.div`
+const Sidebar = styled.div`
   width: 30%;
   margin-left: 20px;
   display: flex;
@@ -640,41 +678,47 @@ export const Sidebar = styled.div`
   }
 `;
 
-export const Updates = styled.div`
- flex: 1;
+const Updates = styled.div`
+  flex: 1;
   background: white;
   padding: 15px;
   border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
-export const UpdateCard = styled.div`
+const UpdateCard = styled.div`
   margin-bottom: 10px;
   padding: 10px;
   background: #f9f9f9;
   border-radius: 5px;
 `;
 
-export const Badge = styled.span`
+const Badge = styled.span`
   display: inline-block;
   padding: 5px 10px;
   background: ${(props) =>
-    props.type === "event" ? "blue" : props.type === "trending" ? "orange" : "green"};
+    props.type === "event" ? "#4287f5" : props.type === "trending" ? "#ff9900" : "#28a745"};
   color: white;
   border-radius: 4px;
   font-size: 12px;
   margin-bottom: 5px;
 `;
 
-export const QuickLinks = styled.div`
- flex: 1;
+const QuickLinks = styled.div`
+  flex: 1;
   background: white;
   padding: 15px;
   border-radius: 8px;
   margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
-export const LinkItem = styled.div`
+const LinkItem = styled.div`
   padding: 8px 0;
   cursor: pointer;
   border-bottom: 1px solid #eee;
+  
+  &:hover {
+    color: #006D77;
+  }
 `;

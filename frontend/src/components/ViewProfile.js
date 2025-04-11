@@ -581,6 +581,7 @@ const styles = {
     fontFamily: "Arial, sans-serif",
     backgroundColor: "#f4f2ee",
     color: "#000",
+    marginTop: "8%",
     padding: "20px",
     display: "flex",
     justifyContent: "space-between",
