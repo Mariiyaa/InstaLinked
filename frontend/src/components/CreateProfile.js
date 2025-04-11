@@ -429,7 +429,7 @@ const ProfileEdit = () => {
           </Updates>
 
           <QuickLinks>
-            <h3>Quick Links</h3>
+            <h3>upcoming features</h3>
             <LinkItem>🌟 Change Theme</LinkItem>
             <LinkItem>🔒 Privacy Settings</LinkItem>
             <LinkItem>🔑 Change Password</LinkItem>
