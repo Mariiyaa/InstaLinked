@@ -22,6 +22,7 @@ import HomeNavbar from './components/HomeNavbar';
 import ViewProfile from "./components/ViewProfile";
 import { SocketProvider } from './context/SocketContext';
 import Notification from './components/Notification';
+import HomePage from "./components/HomePage";
 
 axios.defaults.baseURL = process.env.REACT_APP_BACK_PORT
 axios.defaults.withCredentials = true
@@ -69,7 +70,7 @@ const App = () => {
         <Route path="/persona-selection" element={<PersonaSelection userEmail={user} />} />
         <Route path="/content-selection" element={<ContentSelection userEmail={user} />} />
         <Route path="/messages" element={<Messages />} />
-        <Route path="/Home" element={<HomeNavbar />} />
+        <Route path="/Home" element={<HomePage />} />
         <Route path="/profile/:userId" element={<ViewProfile />} />
         <Route path="/reset-password-request" element={<ResetPasswordRequest />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />

@@ -133,10 +133,11 @@ const HomeNavbar = () => {
             </MenuButton>
 
             <NavLinks isOpen={isOpen}>
-                <NavLink onClick={() => navigate("/explore-page")}>Explore</NavLink>
-                <NavLink onClick={() => navigate("/create-post")}>Create Post</NavLink>
-                <NavLink onClick={() => navigate("/messages")}>Messages</NavLink>
-                <NavLink onClick={() => navigate("/settings")}>Settings</NavLink>
+            <NavLink onClick={() => navigate("/explore-page")}>Explore</NavLink>
+        <NavLink onClick={() => navigate("/create-post")}>Create Post</NavLink>
+        <NavLink onClick={() => navigate(`/profile/${user.email}`)}>My profile</NavLink>
+        <NavLink onClick={() => navigate("/messages")}>Messages</NavLink>
+        <NavLink onClick={() => navigate("/settings")}>Settings</NavLink>
                 <UserSection>
                     <UserAvatar src={user?.profileImage || default_user} alt="User" />
                     <UserName>{user?.fullName || "User"}</UserName>
